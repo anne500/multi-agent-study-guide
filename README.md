@@ -4,6 +4,25 @@ A collection of local multi-agent workflows that generate study guides using Pyt
 
 All LLM calls run locally through Ollama, so no paid API key is required.
 
+## Project Origin and Extension History
+
+This repository began as a hands-on implementation of Darsh Shah's freeCodeCamp article, [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/), published July 14, 2026.
+
+The source tutorial provides two working study-guide implementations:
+
+- **V1 — Plain Python sequential workflow:** a planner, teacher, and quiz writer coordinated with regular Python.
+- **V2 — LangGraph sequential workflow:** the same three-stage pipeline expressed with nodes, edges, and shared graph state.
+
+The tutorial also introduces several multi-agent patterns conceptually and encourages readers to extend the example. Starting with V3, this repository goes beyond the tutorial by implementing, testing, debugging, and preserving each extension as a separate version.
+
+| Project stage | Versions | Provenance |
+|---|---|---|
+| Tutorial baseline | V1–V2 | Implementations based on the freeCodeCamp tutorial |
+| Extended learning project | V3–V9 | New implementations developed for this repository |
+| Forward roadmap | V10–V17 | Planned extensions that continue building on the accumulated project |
+
+V3–V9 do not replace the freeCodeCamp baseline. They preserve it and progressively add simplification, parallel execution, dynamic delegation, routing, human approval, review and revision, structured outputs, synthesis, retries, validation, and safe failure handling. This versioned structure makes it possible to compare each architecture with the one before it and understand why each new capability was added.
+
 ## What Is an Agent Here?
 
 In this project, an agent is a focused LLM call with a specific responsibility, its own prompt and instructions, and a defined position in the workflow. Agents collaborate by passing outputs through regular Python variables or LangGraph shared state.
@@ -23,6 +42,8 @@ In this project, an agent is a focused LLM call with a specific responsibility, 
 | `study_guide_v9_structured_outputs.py` | Structured resilient workflow | Combines structured routing, validated orchestration, parallel workers, synthesis, quiz review, retries, and fallbacks |
 
 ## V9: Structured Outputs and Resilient Orchestration
+
+V8 introduced automated quiz review and revision, but testing exposed a reliability problem: the local model could return a malformed or empty reviewer response, causing structured parsing to fail and the workflow to crash. **V9 directly addresses the malformed reviewer response encountered in V8** by adding structured-output retries, exception handling, validated fallbacks, and a bounded safe-stop path.
 
 V9 combines the earlier patterns into one end-to-end LangGraph workflow:
 
@@ -57,6 +78,24 @@ flowchart TD
     I --> G
     G -->|max iterations| H
 ```
+
+## Extension Roadmap: V9–V17
+
+V9 is the first completed stage in a nine-stage roadmap for turning the original tutorial example into a more reliable, observable, and deployable multi-agent system. Each stage remains a separate implementation so the repository preserves the learning progression.
+
+| Version | Stage | Planned or completed capability |
+|---|---|---|
+| V9 | Structured outputs and resilient validation | **Completed.** Adds Pydantic-validated routing, orchestration, parallel workers, deterministic synthesis, review retries, fallbacks, and maximum-iteration protection. |
+| V10 | Persistence and checkpointing | Save LangGraph state with thread IDs and checkpoints so interrupted workflows can resume. |
+| V11 | Long-term memory | Remember learner preferences, ability level, previous topics, quiz performance, mistakes, and progress across runs. |
+| V12 | Retrieval-augmented generation | Retrieve information from trusted local documents and use citations in notes and quizzes. |
+| V13 | Tool-using agents | Give selected agents controlled access to document search, calculators, code execution, and other task-specific tools. |
+| V14 | Dynamic planning and agent selection | Let the supervisor choose the number and roles of specialists and the workflow path required for a topic. |
+| V15 | Evaluation and observability | Record quality metrics, agent timings, model calls, failures, evaluation datasets, and version comparisons. |
+| V16 | Human approval and interactive revision | Let the learner inspect, approve, reject, edit, or redirect intermediate outputs before execution continues. |
+| V17 | Application and deployment | Package the system as an application or API with saved sessions, controls, workflow status, downloadable guides, and deployment documentation. |
+
+For every extension, the README will record its relationship to the previous version, the problem addressed, architecture and execution flow, agents and graph state, reliability behavior, run and verification commands, observed results, known limitations, and lessons learned.
 
 ## Requirements
 
@@ -163,8 +202,8 @@ A full local run was also completed successfully. It generated and synthesized t
 - More agents do not automatically produce better results.
 - Local LLM output should still be checked for factual accuracy.
 
-## Acknowledgements
+## Acknowledgements and Attribution
 
-Inspired by the freeCodeCamp tutorial [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/).
+The foundation of this repository—V1 and V2—is based on Darsh Shah's freeCodeCamp tutorial [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/).
 
-This project extends the original sequential example with simplification, parallel execution, dynamic delegation, routing, human approval, automated review loops, structured outputs, and resilient failure handling.
+The tutorial established the original planner → teacher → quiz-writer study-guide example in both plain Python and LangGraph. This repository preserves those baseline versions and documents the subsequent V3–V9 work as project-specific extensions: simplification, parallel execution, dynamic delegation, routing, human approval, automated review loops, structured outputs, deterministic synthesis, retries, validation, and resilient failure handling.
