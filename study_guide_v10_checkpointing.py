@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field
 import operator
 import sys
 import time
+import sqlite3
 
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_ollama import ChatOllama
 from langgraph.types import Send
 from langgraph.graph import StateGraph, START, END
@@ -14,7 +16,7 @@ MODEL = ChatOllama(model="qwen3.5:4b", temperature=0)
 class ReviewResult(BaseModel):
     """Validated structured response from the quiz reviewer."""
 
-    status: Literal["approved", "revise"] = Field(
+    status: Literal["approved", "revise", "fallback_approved"] = Field(
         description="Whether the quiz satisfies every review requirement."
     )
     feedback: str = Field(
@@ -232,7 +234,7 @@ def teacher(state: ReviewState) -> dict:
             "teacher",
             (
                 f"Write accurate {state['learner_level']}-level study notes about the topic. "
-		"Use exactly 3 short sections and stay under 250 words."
+        "Use exactly 3 short sections and stay under 250 words."
             ),
             state["topic"],
         )
@@ -304,16 +306,20 @@ def reviewer(state: ReviewState) -> dict:
         status = review_result.status
         feedback = review_result.feedback
     else:
-        # Recover safely instead of crashing the LangGraph workflow.
-        status = "revise"
+        # Preserve the generated quiz and stop safely when structured
+        # parsing is unavailable. Parser failure is not evidence that the
+        # quiz itself is invalid.
+        status = "fallback_approved"
         feedback = (
-            "The structured reviewer returned invalid or empty JSON after "
-            "two attempts. Revise the quiz so it contains exactly three "
-            "complete questions, uses only the supplied notes, and contains "
-            "no answers or hints. "
+            "Safe reviewer fallback used because the structured reviewer "
+            "returned invalid or empty JSON after two attempts. The existing "
+            "nonblank quiz was preserved and no costly revision loop was run. "
             f"Parser error: {last_error}"
         )
-        print("\nSafe reviewer fallback activated.")
+        print(
+            "\nSafe reviewer fallback activated. "
+            "Preserving the current quiz and ending review."
+        )
 
     # Stop safely instead of allowing an infinite model loop.
     if status == "revise" and state["revision_count"] >= 2:
@@ -337,9 +343,9 @@ def quiz_reviser(state: ReviewState) -> dict:
     revised_quiz = run_node(
         "quiz_reviser",
         (
-            "Revise the quiz using the Reviewer feedback. Return exactly 3 complete "
-            "questions based only on the supplied notes. Do not include answers, "
-            "hints, commentary, or outside facts."
+            "Revise the quiz using the reviewer feedback. Return exactly 3 "
+            "complete questions based only on the supplied notes. Do not "
+            "include answers, hints, commentary, or outside facts."
         ),
         (
             f"Topic: {state['topic']}\n\n"
@@ -347,19 +353,25 @@ def quiz_reviser(state: ReviewState) -> dict:
             f"Current quiz:\n{state['quiz']}\n\n"
             f"Reviewer feedback:\n{state['reviewer_feedback']}"
         ),
-    )
+    ).strip()
+
+    if not revised_quiz:
+        print(
+            "\nQuiz reviser returned empty output. "
+            "Preserving the previous quiz."
+        )
+        revised_quiz = state["quiz"]
 
     return {
         "quiz": revised_quiz,
         "revision_count": state["revision_count"] + 1,
     }
 
-
 # Conditional-edge function after each review.
 def route_after_review(state: ReviewState) -> str:
     return state["review_status"]
 
-def build_graph():
+def build_graph(checkpointer=None, interrupt_before=None):
     graph = StateGraph(ReviewState)
 
     graph.add_node("router", router)
@@ -385,6 +397,7 @@ def build_graph():
         route_after_review,
         {
             "approved": END,
+        "fallback_approved": END,
             "revise": "quiz_reviser",
             "max_iterations": END,
         },
@@ -393,7 +406,10 @@ def build_graph():
     # A revised quiz returns to the Reviewer.
     graph.add_edge("quiz_reviser", "reviewer")
 
-    return graph.compile()
+    return graph.compile(
+    checkpointer=checkpointer,
+    interrupt_before=interrupt_before,
+)
 
 
 if __name__ == "__main__":
@@ -401,34 +417,120 @@ if __name__ == "__main__":
     MODEL.invoke("Say ready.")
     print("Model ready.\n")
 
-    app = build_graph()
-    topic = input("Enter a study topic: ").strip()
-    demo_mode = "--demo-revision" in sys.argv
+    database_path = "study_guide_checkpoints.sqlite"
+    connection = sqlite3.connect(database_path, check_same_thread=False)
+    checkpointer = SqliteSaver(connection)
 
-    if demo_mode:
+    pause_before_quiz = "--pause-before-quiz" in sys.argv
+    interrupt_before = ["quiz_producer"] if pause_before_quiz else None
+
+    app = build_graph(
+        checkpointer=checkpointer,
+        interrupt_before=interrupt_before,
+    )
+
+    if pause_before_quiz:
         print(
-            "\nControlled revision demo enabled. "
-            "The initial quiz will intentionally violate review criteria.\n"
-        )
-    workflow_start = time.time()
+            "\nControlled checkpoint test enabled. "
+            "The workflow will pause before quiz_producer."
+    )
 
-    result = app.invoke({
-        "topic": topic,
-	"learner_level": "beginner",
-	"tasks": [],
-        "completed_sections": [],
-        "demo_mode": demo_mode,
-	"notes": "",
-        "quiz": "",
-        "review_status": "",
-        "reviewer_feedback": "",
-        "revision_count": 0,
-    })
+    thread_id = input(
+        "Enter a session ID, or press Enter to use newtons-laws-session: "
+    ).strip()
+
+    if not thread_id:
+        thread_id = "newtons-laws-session"
+
+    config = {
+        "configurable": {
+            "thread_id": thread_id,
+        }
+    }
+
+    print(f"\nCheckpoint database: {database_path}")
+    print(f"Session thread ID: {thread_id}")
+
+    existing_state = app.get_state(config)
+
+    if existing_state.values:
+        print("\nAn existing checkpoint was found for this session.")
+
+        session_action = input(
+            "Enter R to resume/use it, or N to exit and choose another ID: "
+        ).strip().lower()
+
+        if session_action != "r":
+            print(
+                "\nNo workflow was started. Run V10 again and "
+                "enter a different session ID."
+            )
+            connection.close()
+            raise SystemExit(0)
+
+        workflow_start = time.time()
+
+        if existing_state.next:
+            print("\nResuming the unfinished workflow...")
+            result = app.invoke(None, config)
+        else:
+            print("\nThis session already completed. Loading its saved result...")
+            result = existing_state.values
+
+    else:
+        print("\nNo existing checkpoint was found. Starting a new session.")
+
+        topic = input("Enter a study topic: ").strip()
+        if not topic:
+            topic = "Newton's Laws of Motion"
+
+        demo_mode = "--demo-revision" in sys.argv
+
+        if demo_mode:
+            print(
+                "\nControlled revision demo enabled. "
+                "The initial quiz will intentionally violate review criteria.\n"
+            )
+
+        workflow_start = time.time()
+
+        result = app.invoke(
+            {
+                "topic": topic,
+                "learner_level": "beginner",
+                "tasks": [],
+                "completed_sections": [],
+                "demo_mode": demo_mode,
+                "notes": "",
+                "quiz": "",
+                "review_status": "",
+                "reviewer_feedback": "",
+                "revision_count": 0,
+            },
+            config,
+        )
+
+    saved_state = app.get_state(config)
+
+    print("\nCheckpoint saved successfully.")
+    print(f"Saved thread ID: {thread_id}")
+    print(f"Next scheduled nodes: {saved_state.next}")
+
+    if saved_state.next:
+        print(
+            "\nWorkflow paused successfully at a persistent checkpoint."
+        )
+        print(
+            "Resume by running V10 again without --pause-before-quiz "
+            f"and entering the same session ID: {thread_id}"
+        )
+        connection.close()
+        raise SystemExit(0)
 
     total_time = time.time() - workflow_start
 
     print(
-        f"\n# Reviewed Study Guide: {topic}\n\n"
+        f"\n# Reviewed Study Guide: {result['topic']}\n\n"
         f"## Notes\n{result['notes']}\n\n"
         f"## Final Quiz\n{result['quiz']}\n\n"
         f"Final review status: {result['review_status']}\n"
@@ -436,3 +538,4 @@ if __name__ == "__main__":
         f"Final reviewer feedback: {result['reviewer_feedback']}\n\n"
         f"Total workflow time: {total_time:.1f}s"
     )
+    connection.close()

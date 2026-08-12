@@ -19,3 +19,9 @@ env/
 # Operating systems
 .DS_Store
 Thumbs.db
+
+# LangGraph SQLite checkpoints
+study_guide_checkpoints.sqlite
+study_guide_checkpoints.sqlite-shm
+study_guide_checkpoints.sqlite-wal
+study_guide_checkpoints.sqlite-journal
