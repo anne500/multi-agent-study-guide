@@ -8,18 +8,27 @@ All LLM calls run locally through Ollama. No paid API key is required.
 
 ## Version Roadmap
 
-| Version | Capability introduced |
-|---|---|
-| V1 | Plain Python sequential agents |
-| V2 | LangGraph sequential workflow |
-| V3 | Notes simplification |
-| V4 | Parallel specialist workers |
-| V5 | Orchestrator and subagent delegation |
-| V6 | Supervisor routing |
-| V7 | Human-in-the-loop approval |
-| V8 | Automated review and refinement |
-| V9 | Structured outputs, retry handling, orchestration, and safe fallback |
-| V10 | Persistent SQLite checkpointing and workflow recovery |
+| Version | Capability introduced | Status |
+|---|---|---|
+| V1 | Plain Python sequential agents | Completed |
+| V2 | LangGraph sequential workflow | Completed |
+| V3 | Notes simplification | Completed |
+| V4 | Parallel specialist workers | Completed |
+| V5 | Orchestrator and subagent delegation | Completed |
+| V6 | Supervisor routing | Completed |
+| V7 | Human-in-the-loop approval | Completed |
+| V8 | Automated review and refinement | Completed |
+| V9 | Structured outputs, retry handling, orchestration, and safe fallback | Completed |
+| V10 | Persistent SQLite checkpointing and workflow recovery | Completed |
+| V11 | Cross-session learner memory | Planned |
+| V12 | Retrieval from trusted local documents with citations | Planned |
+| V13 | Tool-using study agents | Planned |
+| V14 | Dynamic planning and agent selection | Planned |
+| V15 | Evaluation, tracing, metrics, and observability | Planned |
+| V16 | Multi-stage human approval and interactive revision | Planned |
+| V17 | User application, API, and deployment | Planned |
+
+See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version.
 
 ## What Is an Agent Here?
 
@@ -45,7 +54,7 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v8_review_loop.py` | Review and refinement | Reviews a quiz and sends it back for revision when necessary |
 | `study_guide_v9_structured_outputs.py` | Structured multi-agent workflow | Adds validated routing, orchestrator assignments, parallel workers, synthesis, structured review, retries, and safe fallback |
 | `study_guide_v10_checkpointing.py` | Persistent workflow | Adds SQLite persistence, pause and resume, completed-session loading, and recovery without repeating completed nodes |
-| `test_v10_reviewer_fallback.py` | Deterministic regression test | Forces structured-review failure and verifies quiz preservation without invoking Ollama |
+| `test_v10_reviewer_fallback.py` | Deterministic regression test | Forces structured-review failure and verifies quiz preservation without invoking Ollama |\n| `docs/ARCHITECTURE.md` | Architecture reference | Shows the implemented V1-V10 workflows and planned V11-V17 designs with detailed diagrams |
 
 ## Requirements
 
@@ -126,6 +135,8 @@ python .\test_v10_reviewer_fallback.py
 ```
 
 ## Workflow Architecture
+
+The [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) contains the complete visual architecture reference. The summary below describes the implemented workflows.
 
 ### V1 and V2: Sequential Pipeline
 
@@ -307,7 +318,7 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
 | Extended learning project | V3-V10 | New implementations developed for this repository |
-| Future development | V11 and later | Planned extensions that build on the completed V1-V10 foundation |
+| Planned extensions | V11-V17 | Long-term memory, retrieval, tools, dynamic planning, evaluation, human control, and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 
