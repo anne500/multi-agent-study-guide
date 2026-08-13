@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V10 are implemented.
-- V11-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
+- V1-V11 are implemented.
+- V12-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -215,21 +215,27 @@ flowchart LR
 
 ## V11: Cross-session learner memory
 
-**Status:** Planned
+**Status:** Implemented
 
-V11 will separate durable learner memory from per-run checkpoints. The workflow will read relevant preferences and progress before planning, then save verified learning outcomes after the session.
+V11 reuses the tested V10 graph while keeping long-term learner memory separate from per-session checkpoints. It recalls a validated profile before graph execution, uses the preferred level for routing, and saves an outcome only after explicit approval.
 
 ```mermaid
 flowchart TD
-    A[Topic and learner ID] --> B[Recall learner memory]
-    B <--> C[(Learner memory store)]
-    B --> D[Personalized V10 workflow]
-    D --> E[Study guide and quiz result]
-    E --> F[Extract verified memory]
-    F --> C
+    A[Learner ID] --> B[Load or create validated profile]
+    B <--> C[(Learner memory SQLite)]
+    B --> D[Select session ID and topic]
+    D --> E{Confirm generation?}
+    E -->|No| F[Exit without model calls]
+    E -->|Yes| G[Personalized V10 graph]
+    G <--> H[(LangGraph checkpoint SQLite)]
+    G --> I[Study guide and reviewed quiz]
+    I --> J{Approve memory save?}
+    J -->|No| K[Keep generated text untrusted]
+    J -->|Yes| L[Validate learner outcome]
+    L --> C
 ```
 
-Planned memory includes learner level, preferences, completed topics, quiz performance, recurring mistakes, and progress. Temporary model text will not be saved as trusted memory without validation.
+The learner-memory store contains learner level, preferences, completed topics, quiz performance, recurring mistakes, and recent progress. Generated study-guide text is not stored as trusted memory. The eight deterministic tests verify validation, persistence, deduplication, learner isolation, summaries, and safe outcome storage without calling Ollama.
 
 ## V12: Retrieval with trusted documents and citations
 
@@ -347,4 +353,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The planned architecture is intentionally incremental. V11-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V12-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.

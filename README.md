@@ -2,7 +2,7 @@
 
 A versioned learning project that builds local multi-agent study-guide workflows with Python, LangGraph, Ollama, and the `qwen3.5:4b` model.
 
-The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, and persistent checkpoint recovery.
+The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, and cross-session learner memory.
 
 All LLM calls run locally through Ollama. No paid API key is required.
 
@@ -20,7 +20,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V8 | Automated review and refinement | Completed |
 | V9 | Structured outputs, retry handling, orchestration, and safe fallback | Completed |
 | V10 | Persistent SQLite checkpointing and workflow recovery | Completed |
-| V11 | Cross-session learner memory | Planned |
+| V11 | Cross-session learner memory | Completed |
 | V12 | Retrieval from trusted local documents with citations | Planned |
 | V13 | Tool-using study agents | Planned |
 | V14 | Dynamic planning and agent selection | Planned |
@@ -54,7 +54,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v8_review_loop.py` | Review and refinement | Reviews a quiz and sends it back for revision when necessary |
 | `study_guide_v9_structured_outputs.py` | Structured multi-agent workflow | Adds validated routing, orchestrator assignments, parallel workers, synthesis, structured review, retries, and safe fallback |
 | `study_guide_v10_checkpointing.py` | Persistent workflow | Adds SQLite persistence, pause and resume, completed-session loading, and recovery without repeating completed nodes |
-| `test_v10_reviewer_fallback.py` | Deterministic regression test | Forces structured-review failure and verifies quiz preservation without invoking Ollama |\n| `docs/ARCHITECTURE.md` | Architecture reference | Shows the implemented V1-V10 workflows and planned V11-V17 designs with detailed diagrams |
+| `test_v10_reviewer_fallback.py` | Deterministic regression test | Forces structured-review failure and verifies quiz preservation without invoking Ollama |
+| `study_guide_v11_long_term_memory.py` | Cross-session learner memory | Reuses the tested V10 graph and adds validated learner profiles, outcomes, personalization, and a separate SQLite memory store |
+| `test_v11_learner_memory.py` | Deterministic memory tests | Verifies validation, persistence, deduplication, learner isolation, summaries, and safe outcome storage without invoking Ollama |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V11 workflows and planned V12-V17 designs with detailed diagrams |
 
 ## Requirements
 
@@ -115,6 +118,7 @@ python -m pip install -r requirements.txt
 | V8 | `python .\study_guide_v8_review_loop.py` |
 | V9 | `python .\study_guide_v9_structured_outputs.py` |
 | V10 | `python .\study_guide_v10_checkpointing.py` |
+| V11 | `python .\study_guide_v11_long_term_memory.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -132,6 +136,12 @@ Run the deterministic V10 fallback regression test:
 
 ```powershell
 python .\test_v10_reviewer_fallback.py
+```
+
+Run the deterministic V11 learner-memory tests:
+
+```powershell
+python .\test_v11_learner_memory.py
 ```
 
 ## Workflow Architecture
@@ -234,6 +244,41 @@ Checkpoint saved successfully.
 Next scheduled nodes: ()
 ```
 
+
+## V11: Cross-Session Learner Memory
+
+V11 reuses the tested V10 workflow and adds a separate `learner_memory.sqlite` store for durable learner facts across different sessions and topics. V10 checkpoints continue to preserve one workflow run, while V11 memory preserves validated learner context.
+
+V11 stores:
+
+- Learner ID
+- Preferred beginner or advanced level
+- Learning preferences
+- Completed topics
+- Quiz scores
+- Recurring mistakes
+- Recent progress across sessions
+
+V11 also provides:
+
+- Memory-informed routing before graph execution
+- Automatic or user-supplied session IDs
+- Visible session plans before generation
+- Explicit confirmation before expensive model calls
+- Explicit approval before saving a learning outcome
+- Pydantic validation for profiles and outcomes
+- Separation between generated model text and trusted learner facts
+- Clean reuse of V10 checkpointing without duplicating V10 source code
+
+Two SQLite databases serve different purposes:
+
+| Database | Purpose |
+|---|---|
+| `study_guide_checkpoints.sqlite` | Saves LangGraph execution state for pause, resume, and recovery within a workflow session |
+| `learner_memory.sqlite` | Saves validated learner profiles and outcomes across separate workflow sessions |
+
+The deterministic V11 suite runs eight tests without Ollama or network calls. It verifies normalization, persistence after reopening SQLite, completed-topic deduplication, quiz history, recurring mistakes, learner isolation, validation failures, and safe behavior for unknown learners.
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -268,6 +313,17 @@ Route after review: fallback_approved
 No Ollama reviewer or quiz-reviser call was executed.
 ```
 
+The following V11 paths were also verified:
+
+1. Learner memory persisted after closing the program and restarting the laptop.
+2. A second session recalled the saved level, preferences, completed topic, score, and mistake history.
+3. Recalled beginner memory selected the beginner workflow route.
+4. An invalid one-task orchestrator response used three validated fallback assignments.
+5. The generated session ID and pre-generation confirmation gate worked correctly.
+6. Declining confirmation exited without model generation.
+7. Two completed topics and two quiz scores persisted across sessions.
+8. All eight deterministic learner-memory tests passed without Ollama calls.
+
 ## Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
@@ -288,6 +344,8 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V10: Pre-fix diagnostic run | About 6,505 seconds, which exposed the inherited reviewer-fallback defect |
 | V10: Completed checkpoint load | About 0 seconds, with no Ollama calls |
 | V10: Deterministic fallback test | Fast local test, with no Ollama calls |
+| V11: Conservation of Energy session | About 2,281 seconds |
+| V11: Deterministic memory tests | Fast local tests, with no Ollama calls |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -300,6 +358,8 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Structured output still requires retry and fallback behavior.
 - Parser failure is not proof that generated content is invalid.
 - Durable checkpoints prevent completed work from being repeated.
+- Long-term learner memory must remain separate from per-session workflow checkpoints.
+- Only validated learner facts and approved outcomes should become trusted memory.
 - Human review remains useful when approval matters more than speed.
 - Local LLM output should still be checked for factual accuracy.
 
@@ -317,8 +377,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 | Project stage | Versions | Provenance |
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
-| Extended learning project | V3-V10 | New implementations developed for this repository |
-| Planned extensions | V11-V17 | Long-term memory, retrieval, tools, dynamic planning, evaluation, human control, and deployment |
+| Extended learning project | V3-V11 | New implementations developed for this repository |
+| Planned extensions | V12-V17 | Retrieval, tools, dynamic planning, evaluation, human control, and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 

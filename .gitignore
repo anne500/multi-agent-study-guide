@@ -25,3 +25,7 @@ study_guide_checkpoints.sqlite
 study_guide_checkpoints.sqlite-shm
 study_guide_checkpoints.sqlite-wal
 study_guide_checkpoints.sqlite-journal
+
+# V11 learner memory and local repair backups
+learner_memory*.sqlite
+*.before-*.py
