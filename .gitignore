@@ -30,3 +30,4 @@ study_guide_checkpoints.sqlite-journal
 learner_memory*.sqlite
 *.before-*.py
 study_guide_v12_checkpoints.sqlite
+study_guide_v13_checkpoints.sqlite

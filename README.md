@@ -2,7 +2,7 @@
 
 A versioned learning project that builds local multi-agent study-guide workflows with Python, LangGraph, Ollama, and the `qwen3.5:4b` model.
 
-The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, cross-session learner memory, and retrieval from trusted local documents with verified citations.
+The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, cross-session learner memory, trusted retrieval with verified citations, and controlled tool use.
 
 All LLM calls run locally through Ollama. No paid API key is required.
 
@@ -22,7 +22,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V10 | Persistent SQLite checkpointing and workflow recovery | Completed |
 | V11 | Cross-session learner memory | Completed |
 | V12 | Retrieval from trusted local documents with citations | Completed |
-| V13 | Tool-using study agents | Planned |
+| V13 | Controlled tool-using study agents | Completed |
 | V14 | Dynamic planning and agent selection | Planned |
 | V15 | Evaluation, tracing, metrics, and observability | Planned |
 | V16 | Multi-stage human approval and interactive revision | Planned |
@@ -59,8 +59,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `test_v11_learner_memory.py` | Deterministic memory tests | Verifies validation, persistence, deduplication, learner isolation, summaries, and safe outcome storage without invoking Ollama |
 | `study_guide_v12_rag_citations.py` | Trusted retrieval and citations | Loads approved local Markdown, retrieves deterministic chunks, grounds generation, validates citations, and integrates V11 memory with a separate V12 checkpoint store |
 | `test_v12_retrieval_citations.py` | Deterministic retrieval tests | Runs 19 tests covering source loading, chunking, ranking, citations, item-level validation, retry behavior, and deterministic fallback without invoking Ollama |
+| `study_guide_v13_tool_using_agents.py` | Controlled tool-using agent | Adds schema-controlled selection, an explicit local tool allowlist, validated observations, bounded tool calls, answer verification, and V13 checkpointing |
+| `test_v13_tool_using_agents.py` | Deterministic tool tests | Runs 30 tests covering the registry, safe arithmetic, unit conversion, trusted search, schemas, routing, references, and failure handling without invoking Ollama |
 | `trusted_documents/` | Approved local sources | Contains curated Markdown sources with stable source IDs and section headings |
-| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V12 workflows and planned V13-V17 designs with detailed diagrams |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V13 workflows and planned V14-V17 designs with detailed diagrams |
 
 ## Requirements
 
@@ -70,6 +72,7 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 - `langchain-ollama`
 - `langgraph`
 - `langgraph-checkpoint-sqlite`
+- `pydantic`
 
 Developed and tested on Windows with Python 3.14.
 
@@ -123,6 +126,7 @@ python -m pip install -r requirements.txt
 | V10 | `python .\study_guide_v10_checkpointing.py` |
 | V11 | `python .\study_guide_v11_long_term_memory.py` |
 | V12 | `python .\study_guide_v12_rag_citations.py` |
+| V13 | `python .\study_guide_v13_tool_using_agents.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -152,6 +156,12 @@ Run the deterministic V12 retrieval and citation tests:
 
 ```powershell
 python .\test_v12_retrieval_citations.py
+```
+
+Run the deterministic V13 controlled-tool tests:
+
+```powershell
+python .\test_v13_tool_using_agents.py
 ```
 
 ## Workflow Architecture
@@ -317,6 +327,24 @@ The deterministic V12 suite runs 19 tests without Ollama, network access, a vect
 
 The verified end-to-end Conservation of Energy run recalled the V11 beginner profile, retrieved four approved chunks, produced three substantive cited sections and three independently cited quiz questions, received `approved` structured-review status, received `valid` deterministic citation status, and completed in about 3,056 seconds. The approved outcome was then saved to learner memory without storing generated notes as trusted facts.
 
+## V13: Controlled Tool-Using Study Agent
+
+V13 adds a bounded tool-use loop without granting the model arbitrary execution privileges. A structured controller may choose one of three approved local tools or return a final response grounded in validated observations.
+
+The approved tools are:
+
+| Tool | Purpose | Safety boundary |
+|---|---|---|
+| `calculator` | Evaluate study-related arithmetic | Parses numeric syntax with `ast`; no Python `eval`, names, functions, imports, or shell access |
+| `unit_converter` | Convert approved length, mass, and time units | Uses a fixed unit table and rejects unknown units or cross-dimension conversions |
+| `trusted_search` | Search the V12 approved Markdown corpus | Reuses deterministic retrieval and returns only validated `[S#]` citations |
+
+Each call produces a `ToolObservation` with a stable `[T#]` reference. Final answers may cite only tool observations that actually ran and source citations returned by trusted search. Unknown tools, invalid arguments, unsafe arithmetic, missing references, invented citations, and malformed final actions fail closed.
+
+The LangGraph loop is bounded to two tool calls. Model selection receives one corrective retry, then uses deterministic routing. The workflow never exposes a shell tool, arbitrary code execution, or a network tool. Its SQLite checkpoint store is separate from V10, V11, and V12 persistence.
+
+The deterministic V13 suite runs 30 tests without Ollama, network access, LangGraph execution, or a persistent database. A verified end-to-end run selected `unit_converter`, converted 5 kilometers to 5,000 meters, retained `[T1]`, and completed successfully. A second test against the actual V12 corpus returned approved friction and energy passages with `[S1]`, `[S2]`, and `[T1]`, and passed deterministic observation validation.
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -374,6 +402,19 @@ The following V12 paths were verified:
 8. Unknown or missing citations blocked final validation and trusted-memory storage.
 9. All 19 deterministic tests passed without Ollama or network calls.
 
+The following V13 paths were verified:
+
+1. Only `calculator`, `trusted_search`, and `unit_converter` are registered.
+2. Unknown tool names fail without execution.
+3. The calculator accepts bounded numeric arithmetic and rejects code, functions, imports, large exponents, and division by zero.
+4. The unit converter validates units and measurement dimensions.
+5. Trusted search preserves only citations returned by V12 retrieval.
+6. Every observation receives a stable `[T#]` reference.
+7. Final answers reject unknown tool references and invented source citations.
+8. The agent loop is limited to two tool calls.
+9. The real unit-conversion workflow completed with `5.0 km = 5000 m [T1]`.
+10. All 30 deterministic tests passed without Ollama or network calls.
+
 ## Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
@@ -398,6 +439,8 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V11: Deterministic memory tests | Fast local tests, with no Ollama calls |
 | V12: Grounded Conservation of Energy session | About 3,056 seconds |
 | V12: Deterministic retrieval and citation tests | Fast local tests, with no Ollama calls |
+| V13: Controlled unit-conversion session | Completed locally; exact time was not recorded |
+| V13: Deterministic tool tests | About 0.008 seconds, with no Ollama calls |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -415,6 +458,9 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Retrieval should expose stable source metadata and deterministic citation labels.
 - Citation validity must be checked per section and per question, not only across the combined document.
 - A grounded workflow needs deterministic fallback content when a local model returns blank or uncited text.
+- Tool use should begin with a closed allowlist rather than arbitrary capabilities.
+- Tool arguments, observations, and final references require independent validation.
+- Deterministic local tools can provide exact results while the model remains responsible only for bounded selection and explanation.
 - Human review remains useful when approval matters more than speed.
 - Local LLM output should still be checked for factual accuracy.
 
@@ -432,8 +478,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 | Project stage | Versions | Provenance |
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
-| Extended learning project | V3-V12 | New implementations developed for this repository |
-| Planned extensions | V13-V17 | Tools, dynamic planning, evaluation, human control, and deployment |
+| Extended learning project | V3-V13 | New implementations developed for this repository |
+| Planned extensions | V14-V17 | Dynamic planning, evaluation, human control, and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 

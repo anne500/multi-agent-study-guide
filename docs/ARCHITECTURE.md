@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V12 are implemented.
-- V13-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
+- V1-V13 are implemented.
+- V14-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -270,19 +270,36 @@ The 19 deterministic tests run without Ollama, network access, or a vector datab
 
 ## V13: Tool-using study agents
 
-**Status:** Planned
+**Status:** Implemented
 
-V13 will let an agent choose from a controlled tool registry. Tool results return as observations before the agent produces its final response.
+V13 adds schema-controlled tool selection to the V12 trusted-context foundation. The model can request only a tool in the closed registry. Deterministic validation runs before and after execution, every observation receives a `[T#]` reference, and final answers may use only source citations and tool references that were actually returned.
 
 ```mermaid
 flowchart TD
-    A[Study task] --> B[Tool-aware agent]
-    B --> C{Tool needed?}
-    C -->|No| D[Final response]
-    C -->|Yes| E[Approved tool]
-    E --> F[Validated observation]
-    F --> B
+    A[Study question] --> B[Structured tool selector]
+    B --> C{Decision}
+    C -->|Final| D[Answer verifier]
+    C -->|Tool request| E[Allowlist and argument validator]
+    E -->|Rejected| F[Safe failure observation]
+    E -->|Approved| G{Local tool}
+    G --> H[Calculator]
+    G --> I[Unit converter]
+    G --> J[Trusted V12 search]
+    H --> K[Observation validator]
+    I --> K
+    J --> K
+    F --> K
+    K -->|Below two-call limit| B
+    K -->|Limit reached| D
+    D --> L[Verified answer with T and S references]
+    L <--> M[(V13 checkpoint SQLite)]
 ```
+
+The calculator parses a bounded numeric abstract syntax tree and never calls Python `eval`. The unit converter uses a fixed table for approved length, mass, and time units. Trusted search reuses V12 deterministic retrieval and citation verification. No shell, arbitrary-code, or network tool is registered.
+
+Model selection receives one structured-output retry before deterministic routing takes over. Unknown tools and invalid arguments produce structured safe failures instead of execution. The answer verifier rejects unknown `[T#]` references and any `[S#]` citation not returned by trusted search.
+
+Thirty deterministic tests verify the registry, calculator, unit conversion, trusted search, schemas, routing, references, and failure handling without Ollama or network access. A verified end-to-end run selected the unit converter and returned `5.0 km = 5000 m [T1]`. A separate actual-corpus test returned validated V12 friction and energy evidence with `[S1]`, `[S2]`, and `[T1]`.
 
 ## V14: Dynamic planning and agent selection
 
@@ -368,4 +385,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The architecture is intentionally incremental. V13-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V14-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
