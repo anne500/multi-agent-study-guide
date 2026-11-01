@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V14 are implemented.
-- V15-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
+- V1-V15 are implemented.
+- V16-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -344,20 +344,42 @@ arbitrary goals or learner mastery. Details are in [the V14 guide](V14_GUIDE.md)
 
 ## V15: Evaluation and observability
 
-**Status:** Planned
+**Status:** Implemented
 
-V15 will instrument workflow execution and evaluate output quality. Traces, latency, route choices, retries, retrieval quality, and learning-quality checks will support debugging and comparison.
+V15 wraps V14's planning, specialist, evaluator, and replanning nodes to record
+ordered spans and outcomes. A separate model wrapper measures actual structured
+model invocations, including call failures. The observer preserves V14 execution
+state while attaching metrics, citation-integrity checks, and saved reports.
 
 ```mermaid
 flowchart TD
-    A[Instrumented workflow] --> B[Events and traces]
-    A --> C[Generated artifacts]
-    B --> D[(Trace and metric store)]
-    C --> E[Quality evaluators]
-    E --> D
-    D --> F[Evaluation report]
-    F --> G[Regression decision]
+    A[Study goal or fixed cases] --> B[Observed V14 workflow]
+    B --> C[Phase and model spans]
+    B --> D[Task outcomes and evidence]
+    C --> E[Execution metrics]
+    D --> F[Integrity and expected-result checks]
+    E --> G[Evaluation report]
+    F --> G
+    G --> H[(SQLite reports and traces)]
 ```
+
+The fixed offline suite has five cases: arithmetic, conversion, compound tool use,
+division by zero, and missing evidence. Expected incomplete outcomes pass their
+evaluation cases. Saved reports reload without tools or models; connections close
+explicitly on both successful and error paths. Reports are final artifacts, not
+resumable node checkpoints.
+
+Verified runtime evidence includes a five-of-five actual-corpus benchmark and a
+live run with three completed tasks, one model attempt, one accepted plan, no
+fallback, and 234.684 seconds elapsed. Development tests cover 27 paths, including
+actual graph parity, model retry accounting, evidence mismatch rejection, and
+SQLite closure.
+
+Citation checks establish ID integrity and retained-source consistency, not
+semantic support or goal coverage. The live researcher selected one energy-forms
+passage; the report does not claim that this fully explains conservation. Timings
+are per phase and model call; nested timings overlap, and per-tool latency and
+token usage are not measured. See [the V15 guide](V15_GUIDE.md).
 
 ## V16: Multi-stage human approval
 
@@ -409,4 +431,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The architecture is intentionally incremental. V15-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V16-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.

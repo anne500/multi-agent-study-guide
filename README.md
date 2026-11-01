@@ -24,7 +24,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V12 | Retrieval from trusted local documents with citations | Completed |
 | V13 | Controlled tool-using study agents | Completed |
 | V14 | Dynamic planning and agent selection | Completed |
-| V15 | Evaluation, tracing, metrics, and observability | Planned |
+| V15 | Evaluation, tracing, metrics, and observability | Completed |
 | V16 | Multi-stage human approval and interactive revision | Planned |
 | V17 | User application, API, and deployment | Planned |
 
@@ -65,7 +65,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v14_dynamic_planning.py` | Bounded dynamic planning | Selects specialists, evaluates task completion, replans unfinished work, and saves run snapshots |
 | `test_v14_dynamic_planning.py` | Planning and persistence tests | Runs 31 tests including LangGraph parity, bounded failure, citation mapping, and SQLite connection closure |
 | `docs/V14_GUIDE.md` | V14 usage and limitations | Documents offline and Ollama workflows, run snapshots, execution budgets, and evaluation limits |
-| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V14 workflows and planned V15-V17 designs with detailed diagrams |
+| `study_guide_v15_evaluation_observability.py` | Observed V14 execution and evaluation | Records phase/model timings, task outcomes, planning metrics, citation integrity, and fixed offline evaluations |
+| `test_v15_evaluation_observability.py` | Observability regression tests | Runs 27 tests covering graph parity, retries, metrics, evidence checks, report persistence, and connection closure |
+| `docs/V15_GUIDE.md` | V15 evaluation scope and usage | Explains metrics, the offline benchmark, saved reports, trace inspection, and evaluation limits |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V15 workflows and planned V16-V17 designs with detailed diagrams |
 
 ## Requirements
 
@@ -131,6 +134,7 @@ python -m pip install -r requirements.txt
 | V12 | `python .\study_guide_v12_rag_citations.py` |
 | V13 | `python .\study_guide_v13_tool_using_agents.py` |
 | V14 | `python .\study_guide_v14_dynamic_planning.py` |
+| V15 | `python .\study_guide_v15_evaluation_observability.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -178,6 +182,13 @@ Run the V14 tests:
 
 ```powershell
 python .\test_v14_dynamic_planning.py
+```
+
+Run the V15 offline benchmark and tests:
+
+```powershell
+python .\study_guide_v15_evaluation_observability.py --benchmark
+python .\test_v15_evaluation_observability.py
 ```
 
 ## Workflow Architecture
@@ -395,6 +406,32 @@ natural-language goal was decomposed correctly, that retrieval covered every
 requested concept, or that the learner mastered the topic. See
 [the V14 guide](docs/V14_GUIDE.md) for usage and limitations.
 
+## V15: Evaluation, Tracing, Metrics, and Observability
+
+V15 instruments the V14 workflow through node wrappers and a structured-model
+wrapper. It records ordered traces, elapsed offsets, phase and model-call
+durations, task outcomes, model attempts, rejected plans, deterministic planning
+rounds, execution budgets, and task completion. The execution engine and earlier
+version files remain reusable without modifications.
+
+The local evaluator checks source and tool references against the run's evidence
+and verifies that researcher passages retain their cited source text. A five-case
+offline suite checks arithmetic, conversion, a compound request, division-by-zero
+handling, and missing evidence against explicit expected results. A failure case
+passes the evaluation when it produces the expected incomplete outcome.
+
+Reports and traces are stored in `study_guide_v15_reports.sqlite` under unique
+report IDs. Use `--show REPORT_ID` to reload a report and add `--trace` to inspect
+its saved events without rerunning the model or tools. Keep the database and
+sidecars local with `study_guide_v15_reports.sqlite*` in `.gitignore`.
+
+Metrics have explicit limits: nested model timings overlap the planning phase,
+individual tool latency is not measured, and token usage is unavailable rather
+than estimated. Citation-ID integrity does not measure semantic entailment,
+retrieval relevance, learner mastery, or completeness of an explanation. The
+five fixed cases are an offline regression suite, not a broad model-quality
+benchmark. See [the V15 guide](docs/V15_GUIDE.md) for precise definitions.
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -476,6 +513,16 @@ The following V14 paths were verified:
 7. SQLite connections close on success, early return, and error. This fixes the Windows file-lock failure discovered during initial testing.
 8. Tests verify snapshot reload, duplicate-session rejection, and goal/corpus mismatch rejection without Ollama calls.
 
+The following V15 evidence was recorded:
+
+1. All 27 development tests passed, including both actual LangGraph execution tests.
+2. The actual-corpus offline benchmark passed all five cases, including the two expected incomplete outcomes.
+3. Reloading the saved benchmark returned the identical results and recorded durations without rerunning execution.
+4. A live Ollama and LangGraph run completed three tasks with three tool attempts, zero replans, one model attempt, one accepted plan, and zero deterministic planning rounds.
+5. The live run recorded `234683.861 ms` elapsed time and passed citation-ID integrity. Semantic entailment was explicitly not evaluated.
+6. The live arithmetic result was `60 [T2]`; conversion returned `5000 m [T3]`. The researcher returned one cited Common forms of energy passage, which does not establish a complete explanation of conservation.
+7. Tests verify connection closure after successful reads/writes, missing-report errors, and duplicate-report rejection, addressing the Windows file-handle issue found in V14.
+
 ## Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
@@ -504,6 +551,8 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V13: Deterministic tool tests | About 0.008 seconds, with no Ollama calls |
 | V14: Deterministic planning tests | About 0.980 seconds for 31 tests on Windows |
 | V14: Offline and Ollama runtime checks | Completed; exact workflow times were not recorded |
+| V15: Live compound run | 234.684 seconds, about 3 minutes 55 seconds |
+| V15: Fixed offline cases | About 0.196 to 0.711 milliseconds per case in the recorded run |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -528,6 +577,9 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Distinguish model-produced plans from deterministic fallback in recorded events.
 - A SQLite transaction context does not close its connection; close it explicitly for reliable Windows cleanup.
 - Saved run reports and resumable workflow checkpoints have different recovery guarantees.
+- Separate execution completion and citation integrity from answer quality and semantic coverage.
+- Record actual model attempts and fallback events instead of inferring model success from the final result.
+- Evaluation pass rates need explicit expected outcomes and a clearly stated benchmark scope.
 - Human review remains useful when approval matters more than speed.
 - Local LLM output should still be checked for factual accuracy.
 
@@ -545,8 +597,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 | Project stage | Versions | Provenance |
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
-| Extended learning project | V3-V14 | New implementations developed for this repository |
-| Planned extensions | V15-V17 | Evaluation, human control, and deployment |
+| Extended learning project | V3-V15 | New implementations developed for this repository |
+| Planned extensions | V16-V17 | Human control and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 
