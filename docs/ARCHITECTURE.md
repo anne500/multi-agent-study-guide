@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V13 are implemented.
-- V14-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
+- V1-V14 are implemented.
+- V15-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -303,20 +303,44 @@ Thirty deterministic tests verify the registry, calculator, unit conversion, tru
 
 ## V14: Dynamic planning and agent selection
 
-**Status:** Planned
+**Status:** Implemented
 
-V14 will create a plan from the request, select only the required agents and tools, evaluate intermediate progress, and replan when a task fails or new information changes the path.
+V14 validates a plan of one to four tasks and selects researcher, calculator, or
+converter specialists. Model planning receives one corrective retry, then uses a
+deterministic fallback. The evaluator checks planned task completion and allows
+one replan for unfinished work. Completed tasks stay frozen across replanning.
 
 ```mermaid
 flowchart TD
-    A[Learning goal] --> B[Dynamic planner]
-    B --> C[Task decomposition]
-    C --> D[Agent and tool selection]
-    D --> E[Execute current task]
-    E --> F{Goal satisfied?}
-    F -->|Yes| G[Final synthesis]
-    F -->|No| B
+    A[Study goal] --> B[Planner and schema validation]
+    B --> C[Execute selected specialists]
+    C --> D{All tasks complete?}
+    D -->|Yes| E[Completed report]
+    D -->|No| F{Budget remains?}
+    F -->|Yes| G[Replan unfinished tasks]
+    G --> C
+    F -->|No| H[Incomplete report]
+    E --> I[(SQLite run snapshots)]
+    H --> I
 ```
+
+Research tasks reuse V12 lexical retrieval with globally consistent source labels
+within the run. Calculator and converter tasks reuse V13 tool validation.
+Dependencies control execution order and block tasks with failed prerequisites;
+they do not substitute prior results into later tool arguments. Eight total tool
+executions and one replanning round bound the workflow.
+
+Offline execution uses a Python loop; normal execution uses LangGraph nodes for
+planning, specialist execution, evaluation, and replanning. Tests verify matching
+results and bounded termination. Run snapshots bind the goal and corpus digest to
+a session ID and can reload completed or incomplete reports. They do not resume
+interrupted nodes. SQLite connections are explicitly closed on every path.
+
+Verified evidence includes 31 passing Windows tests, a three-specialist offline
+run, a live Ollama plan accepted on attempt 1 with three completed tasks, and a
+division-by-zero run that stopped as incomplete after two executions and one
+replan. The evaluator establishes execution completion, not semantic coverage of
+arbitrary goals or learner mastery. Details are in [the V14 guide](V14_GUIDE.md).
 
 ## V15: Evaluation and observability
 
@@ -385,4 +409,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The architecture is intentionally incremental. V14-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V15-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.

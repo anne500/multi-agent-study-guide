@@ -23,7 +23,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V11 | Cross-session learner memory | Completed |
 | V12 | Retrieval from trusted local documents with citations | Completed |
 | V13 | Controlled tool-using study agents | Completed |
-| V14 | Dynamic planning and agent selection | Planned |
+| V14 | Dynamic planning and agent selection | Completed |
 | V15 | Evaluation, tracing, metrics, and observability | Planned |
 | V16 | Multi-stage human approval and interactive revision | Planned |
 | V17 | User application, API, and deployment | Planned |
@@ -62,7 +62,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v13_tool_using_agents.py` | Controlled tool-using agent | Adds schema-controlled selection, an explicit local tool allowlist, validated observations, bounded tool calls, answer verification, and V13 checkpointing |
 | `test_v13_tool_using_agents.py` | Deterministic tool tests | Runs 30 tests covering the registry, safe arithmetic, unit conversion, trusted search, schemas, routing, references, and failure handling without invoking Ollama |
 | `trusted_documents/` | Approved local sources | Contains curated Markdown sources with stable source IDs and section headings |
-| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V13 workflows and planned V14-V17 designs with detailed diagrams |
+| `study_guide_v14_dynamic_planning.py` | Bounded dynamic planning | Selects specialists, evaluates task completion, replans unfinished work, and saves run snapshots |
+| `test_v14_dynamic_planning.py` | Planning and persistence tests | Runs 31 tests including LangGraph parity, bounded failure, citation mapping, and SQLite connection closure |
+| `docs/V14_GUIDE.md` | V14 usage and limitations | Documents offline and Ollama workflows, run snapshots, execution budgets, and evaluation limits |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V14 workflows and planned V15-V17 designs with detailed diagrams |
 
 ## Requirements
 
@@ -127,6 +130,7 @@ python -m pip install -r requirements.txt
 | V11 | `python .\study_guide_v11_long_term_memory.py` |
 | V12 | `python .\study_guide_v12_rag_citations.py` |
 | V13 | `python .\study_guide_v13_tool_using_agents.py` |
+| V14 | `python .\study_guide_v14_dynamic_planning.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -162,6 +166,18 @@ Run the deterministic V13 controlled-tool tests:
 
 ```powershell
 python .\test_v13_tool_using_agents.py
+```
+
+Run V14 without Ollama:
+
+```powershell
+python .\study_guide_v14_dynamic_planning.py --offline
+```
+
+Run the V14 tests:
+
+```powershell
+python .\test_v14_dynamic_planning.py
 ```
 
 ## Workflow Architecture
@@ -345,6 +361,40 @@ The LangGraph loop is bounded to two tool calls. Model selection receives one co
 
 The deterministic V13 suite runs 30 tests without Ollama, network access, LangGraph execution, or a persistent database. A verified end-to-end run selected `unit_converter`, converted 5 kilometers to 5,000 meters, retained `[T1]`, and completed successfully. A second test against the actual V12 corpus returned approved friction and energy passages with `[S1]`, `[S2]`, and `[T1]`, and passed deterministic observation validation.
 
+## V14: Dynamic Planning and Agent Selection
+
+V14 plans up to four tasks and selects only the required researcher, calculator,
+or converter specialists. Ollama produces a structured plan; deterministic schema
+checks validate task IDs, argument keys, and dependencies. Invalid model plans
+receive one retry before deterministic routing takes over. Use semicolons to
+separate independent requests, for example:
+
+```text
+Explain conservation of energy; Calculate (12 + 8) * 3; Convert 5 km to m
+```
+
+The researcher uses V12 retrieval with one citation map across the entire run.
+Calculator and converter tasks use V13 tools. Every result includes its tool
+reference; retrieved passages also have source citations and a source list.
+The final report is assembled from validated tool results without model rewriting.
+
+The evaluator checks completion of every planned task. Failed prerequisites block
+dependent tasks. One replan may correct unfinished work, while completed tasks
+remain frozen and are not executed again. Eight total tool executions are allowed.
+Dependencies enforce order; they do not substitute numeric results into later
+arguments. Offline mode uses deterministic planning with the same execution logic.
+
+`study_guide_v14_runs.sqlite` saves final run snapshots tied to the session ID,
+goal, corpus digest, and implementation version. A matching run can be reloaded
+without model or tool calls. These snapshots cannot resume an interrupted run.
+The database and its sidecar files stay local through the ignore rule
+`study_guide_v14_runs.sqlite*`. V14 does not update learner memory.
+
+Task completion confirms valid tool execution. It does not prove that an arbitrary
+natural-language goal was decomposed correctly, that retrieval covered every
+requested concept, or that the learner mastered the topic. See
+[the V14 guide](docs/V14_GUIDE.md) for usage and limitations.
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -415,6 +465,17 @@ The following V13 paths were verified:
 9. The real unit-conversion workflow completed with `5.0 km = 5000 m [T1]`.
 10. All 30 deterministic tests passed without Ollama or network calls.
 
+The following V14 paths were verified:
+
+1. All 31 tests passed on Windows, including both LangGraph tests with no skips.
+2. The offline compound request completed three tasks with zero replans, valid energy sources, arithmetic result `60 [T2]`, and conversion result `5000 m [T3]`.
+3. The live Ollama run recorded `model_plan` on attempt 1 and three completed task events, with no planner retries or deterministic fallback recorded.
+4. Division by zero produced `incomplete` after two executions and one replan, then exited normally.
+5. Tests verify that completed tasks remain frozen, failed dependencies block execution, and replans cannot remove failed tasks.
+6. Separate searches retain consistent source labels through one session-wide citation map.
+7. SQLite connections close on success, early return, and error. This fixes the Windows file-lock failure discovered during initial testing.
+8. Tests verify snapshot reload, duplicate-session rejection, and goal/corpus mismatch rejection without Ollama calls.
+
 ## Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
@@ -441,6 +502,8 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V12: Deterministic retrieval and citation tests | Fast local tests, with no Ollama calls |
 | V13: Controlled unit-conversion session | Completed locally; exact time was not recorded |
 | V13: Deterministic tool tests | About 0.008 seconds, with no Ollama calls |
+| V14: Deterministic planning tests | About 0.980 seconds for 31 tests on Windows |
+| V14: Offline and Ollama runtime checks | Completed; exact workflow times were not recorded |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -461,6 +524,10 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Tool use should begin with a closed allowlist rather than arbitrary capabilities.
 - Tool arguments, observations, and final references require independent validation.
 - Deterministic local tools can provide exact results while the model remains responsible only for bounded selection and explanation.
+- Replanning should preserve completed evidence and use an explicit execution budget.
+- Distinguish model-produced plans from deterministic fallback in recorded events.
+- A SQLite transaction context does not close its connection; close it explicitly for reliable Windows cleanup.
+- Saved run reports and resumable workflow checkpoints have different recovery guarantees.
 - Human review remains useful when approval matters more than speed.
 - Local LLM output should still be checked for factual accuracy.
 
@@ -478,8 +545,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 | Project stage | Versions | Provenance |
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
-| Extended learning project | V3-V13 | New implementations developed for this repository |
-| Planned extensions | V14-V17 | Dynamic planning, evaluation, human control, and deployment |
+| Extended learning project | V3-V14 | New implementations developed for this repository |
+| Planned extensions | V15-V17 | Evaluation, human control, and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 
