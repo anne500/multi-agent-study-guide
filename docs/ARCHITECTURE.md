@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V11 are implemented.
-- V12-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
+- V1-V12 are implemented.
+- V13-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -239,19 +239,34 @@ The learner-memory store contains learner level, preferences, completed topics, 
 
 ## V12: Retrieval with trusted documents and citations
 
-**Status:** Planned
+**Status:** Implemented
 
-V12 will ground study content in approved local sources. Retrieved chunks and source metadata will flow into generation so the final guide can cite its evidence.
+V12 reuses V11 learner memory and adds deterministic retrieval from approved local Markdown sources. Stable source IDs and section headings produce independently ranked chunks. The selected chunks receive session citation labels, and only that cited context is passed to grounded workers and the quiz producer.
 
 ```mermaid
 flowchart TD
-    A[Learning request] --> B[Retriever]
-    C[(Trusted documents)] --> B
-    B --> D[Relevant cited context]
-    D --> E[Grounded study agents]
-    E --> F[Study guide with citations]
-    F --> G[Citation verifier]
+    A[Learner ID and topic] --> B[Recall V11 memory]
+    B <--> C[(Learner memory SQLite)]
+    B --> D[Load trusted Markdown]
+    E[(Trusted documents)] --> D
+    D --> F[Chunk and lexical rank]
+    F --> G[Assign S1 through S4]
+    G --> H[Grounded parallel workers]
+    H --> I[Per-section validator]
+    I -->|Invalid| J[Retry once or trusted fallback]
+    J --> I
+    I -->|Valid| K[Quiz and structured review]
+    K --> L[Per-question citation validator]
+    L --> M[Final deterministic verifier]
+    M <--> N[(V12 checkpoint SQLite)]
+    M --> O{Approve memory save?}
+    O -->|Yes| C
+    O -->|No| P[Keep generated text untrusted]
 ```
+
+V12 validates each generated section and each quiz question independently. Every item must contain substantive text and at least one allowed citation. An invalid worker response receives one corrective retry. If the retry remains blank, insubstantial, or uncited, the workflow uses deterministic text derived from the retrieved trusted source. Missing or unknown citation IDs block final validation and prevent trusted-memory storage.
+
+The 19 deterministic tests run without Ollama, network access, or a vector database. They verify loading, 14-section chunking, lexical ranking, deterministic results, citation mapping, malformed and duplicate source rejection, item-level validation, corrective retry behavior, trusted-source fallback, and blocking of invalid final output. A verified end-to-end run produced three substantive cited sections, three cited quiz questions, `approved` review status, `valid` citation status, and a 3,056-second local workflow time.
 
 ## V13: Tool-using study agents
 
@@ -353,4 +368,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The architecture is intentionally incremental. V12-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V13-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.

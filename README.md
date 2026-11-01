@@ -2,7 +2,7 @@
 
 A versioned learning project that builds local multi-agent study-guide workflows with Python, LangGraph, Ollama, and the `qwen3.5:4b` model.
 
-The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, and cross-session learner memory.
+The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, cross-session learner memory, and retrieval from trusted local documents with verified citations.
 
 All LLM calls run locally through Ollama. No paid API key is required.
 
@@ -21,7 +21,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V9 | Structured outputs, retry handling, orchestration, and safe fallback | Completed |
 | V10 | Persistent SQLite checkpointing and workflow recovery | Completed |
 | V11 | Cross-session learner memory | Completed |
-| V12 | Retrieval from trusted local documents with citations | Planned |
+| V12 | Retrieval from trusted local documents with citations | Completed |
 | V13 | Tool-using study agents | Planned |
 | V14 | Dynamic planning and agent selection | Planned |
 | V15 | Evaluation, tracing, metrics, and observability | Planned |
@@ -57,7 +57,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `test_v10_reviewer_fallback.py` | Deterministic regression test | Forces structured-review failure and verifies quiz preservation without invoking Ollama |
 | `study_guide_v11_long_term_memory.py` | Cross-session learner memory | Reuses the tested V10 graph and adds validated learner profiles, outcomes, personalization, and a separate SQLite memory store |
 | `test_v11_learner_memory.py` | Deterministic memory tests | Verifies validation, persistence, deduplication, learner isolation, summaries, and safe outcome storage without invoking Ollama |
-| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V11 workflows and planned V12-V17 designs with detailed diagrams |
+| `study_guide_v12_rag_citations.py` | Trusted retrieval and citations | Loads approved local Markdown, retrieves deterministic chunks, grounds generation, validates citations, and integrates V11 memory with a separate V12 checkpoint store |
+| `test_v12_retrieval_citations.py` | Deterministic retrieval tests | Runs 19 tests covering source loading, chunking, ranking, citations, item-level validation, retry behavior, and deterministic fallback without invoking Ollama |
+| `trusted_documents/` | Approved local sources | Contains curated Markdown sources with stable source IDs and section headings |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V12 workflows and planned V13-V17 designs with detailed diagrams |
 
 ## Requirements
 
@@ -119,6 +122,7 @@ python -m pip install -r requirements.txt
 | V9 | `python .\study_guide_v9_structured_outputs.py` |
 | V10 | `python .\study_guide_v10_checkpointing.py` |
 | V11 | `python .\study_guide_v11_long_term_memory.py` |
+| V12 | `python .\study_guide_v12_rag_citations.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -142,6 +146,12 @@ Run the deterministic V11 learner-memory tests:
 
 ```powershell
 python .\test_v11_learner_memory.py
+```
+
+Run the deterministic V12 retrieval and citation tests:
+
+```powershell
+python .\test_v12_retrieval_citations.py
 ```
 
 ## Workflow Architecture
@@ -279,6 +289,34 @@ Two SQLite databases serve different purposes:
 
 The deterministic V11 suite runs eight tests without Ollama or network calls. It verifies normalization, persistence after reopening SQLite, completed-topic deduplication, quiz history, recurring mistakes, learner isolation, validation failures, and safe behavior for unknown learners.
 
+## V12: Trusted Retrieval with Verified Citations
+
+V12 adds retrieval-augmented generation over approved local Markdown documents while preserving V11 learner memory and V10 workflow reliability. It does not require a vector database or network service.
+
+The V12 flow:
+
+1. Loads trusted documents with stable source IDs and section headings.
+2. Splits each document into deterministic section-based chunks.
+3. Ranks chunks with deterministic lexical retrieval.
+4. Assigns stable session citation labels such as `[S1]` through `[S4]`.
+5. Passes only the retrieved context into grounded specialist and quiz prompts.
+6. Validates every specialist section and quiz question independently.
+7. Retries an invalid specialist response once.
+8. Uses a deterministic trusted-source fallback if the retry is blank, insubstantial, or uncited.
+9. Rejects missing, malformed, or unknown citations before an outcome can be saved.
+
+V12 keeps three persistence concerns separate:
+
+| Store | Purpose |
+|---|---|
+| `learner_memory.sqlite` | Validated learner profile and approved outcomes across sessions |
+| `study_guide_v12_checkpoints.sqlite` | V12 LangGraph state for one grounded workflow session |
+| `trusted_documents/` | Approved source material used for retrieval and citations |
+
+The deterministic V12 suite runs 19 tests without Ollama, network access, a vector database, or persistent test databases. It covers source parsing, 14-section chunking, deterministic ranking, citation mapping, duplicate and malformed source rejection, invalid retrieval limits, item-level section checks, item-level quiz checks, retry behavior, and trusted-text fallback.
+
+The verified end-to-end Conservation of Energy run recalled the V11 beginner profile, retrieved four approved chunks, produced three substantive cited sections and three independently cited quiz questions, received `approved` structured-review status, received `valid` deterministic citation status, and completed in about 3,056 seconds. The approved outcome was then saved to learner memory without storing generated notes as trusted facts.
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -324,6 +362,18 @@ The following V11 paths were also verified:
 7. Two completed topics and two quiz scores persisted across sessions.
 8. All eight deterministic learner-memory tests passed without Ollama calls.
 
+The following V12 paths were verified:
+
+1. Two trusted Markdown sources loaded into 14 deterministic section chunks.
+2. A friction query ranked the matching Conservation of Energy section first.
+3. The no-generation confirmation path retrieved and displayed four cited chunks without calling Ollama.
+4. Every final specialist section contained substantive text and an allowed citation.
+5. Every quiz question contained an allowed citation.
+6. Invalid specialist output received one corrective retry.
+7. Deterministic trusted-source fallback remained available after a failed retry.
+8. Unknown or missing citations blocked final validation and trusted-memory storage.
+9. All 19 deterministic tests passed without Ollama or network calls.
+
 ## Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
@@ -346,6 +396,8 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V10: Deterministic fallback test | Fast local test, with no Ollama calls |
 | V11: Conservation of Energy session | About 2,281 seconds |
 | V11: Deterministic memory tests | Fast local tests, with no Ollama calls |
+| V12: Grounded Conservation of Energy session | About 3,056 seconds |
+| V12: Deterministic retrieval and citation tests | Fast local tests, with no Ollama calls |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -360,6 +412,9 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Durable checkpoints prevent completed work from being repeated.
 - Long-term learner memory must remain separate from per-session workflow checkpoints.
 - Only validated learner facts and approved outcomes should become trusted memory.
+- Retrieval should expose stable source metadata and deterministic citation labels.
+- Citation validity must be checked per section and per question, not only across the combined document.
+- A grounded workflow needs deterministic fallback content when a local model returns blank or uncited text.
 - Human review remains useful when approval matters more than speed.
 - Local LLM output should still be checked for factual accuracy.
 
@@ -377,8 +432,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 | Project stage | Versions | Provenance |
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
-| Extended learning project | V3-V11 | New implementations developed for this repository |
-| Planned extensions | V12-V17 | Retrieval, tools, dynamic planning, evaluation, human control, and deployment |
+| Extended learning project | V3-V12 | New implementations developed for this repository |
+| Planned extensions | V13-V17 | Tools, dynamic planning, evaluation, human control, and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 
