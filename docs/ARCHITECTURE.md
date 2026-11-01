@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V15 are implemented.
-- V16-V17 are planned designs. Their diagrams will be checked and updated when each version is implemented.
+- V1-V16 are implemented.
+- V17 is a planned design. Its diagram will be checked and updated when it is implemented.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -383,22 +383,50 @@ token usage are not measured. See [the V15 guide](V15_GUIDE.md).
 
 ## V16: Multi-stage human approval
 
-**Status:** Planned
+**Status:** Implemented
 
-V16 will expand V7 from one outline decision to several controlled review points. A learner can approve, edit, reject, or redirect important state before execution continues.
+V16 expands V7 into durable plan, content, and final approval gates. Each review
+uses a native LangGraph interrupt with SQLite persistence. V14 handles validated
+planning and local tool execution; V15 provides trace and evidence-integrity checks.
 
 ```mermaid
 flowchart TD
-    A[Plan] --> B{Human plan review}
-    B -->|Approve or edit| C[Generate content]
-    B -->|Reject| A
-    C --> D{Human content review}
-    D -->|Approve or edit| E[Generate assessment]
-    D -->|Reject| C
-    E --> F{Final approval}
-    F -->|Approve| G[Complete session]
-    F -->|Revise| C
+    A[Prepare plan] --> B{Plan review}
+    B -->|Approve| C[Execute approved tasks]
+    C --> D{Content review}
+    D -->|Approve| E[Prepare evidence questions]
+    E --> F{Final review}
+    F -->|Approve| G[Approved session]
+    B -->|Revise| B
+    D -->|Revise plan| B
+    F -->|Revise plan| B
+    B -->|Reject| H[Rejected session]
+    D -->|Reject| H
+    F -->|Reject| H
 ```
+
+All review gates support pause and resume under the same session ID. They do not
+perform model or tool work before the interrupt. Revision validates a replacement
+plan, clears approvals and assessment, and invalidates changed tasks and dependent
+results while retaining unchanged completed tasks. Three revisions and eight tool
+executions bound a session. Incomplete content and failed evidence checks block
+approval. Final questions refer to the current approved task rather than stale
+request wording; the original request is retained separately as history.
+
+Verified evidence includes 32 passing Windows tests, an offline pause/exit/resume
+with no repeated tool execution, successful human correction of a failed arithmetic
+task, and a model-mode conversion run with all three approvals. The test suite
+covers real SQLite reopening, CLI resume, stale decisions, rejection, dependency
+invalidation, and the `v16.2` task-label correction.
+
+Review checkpoints are bound to the source corpus, implementation version, and
+offline/model mode. Completed `v16.1` sessions remain stored but cannot resume with
+the changed `v16.2` assessment format. Automatic replay is disabled for sessions
+that stopped outside a review gate; exactly-once execution after an arbitrary
+process crash is not guaranteed. The local workflow is single-process-per-session
+and does not authenticate reviewer identity. Assessment questions are unscored,
+and approval does not establish mastery or semantic entailment. See
+[the V16 guide](V16_GUIDE.md).
 
 ## V17: Application and deployment
 
@@ -431,4 +459,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The architecture is intentionally incremental. V16-V17 will be implemented as separate versions, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V17 will be implemented as a separate version, tested, documented, and compared without replacing the earlier examples.

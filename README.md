@@ -25,7 +25,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V13 | Controlled tool-using study agents | Completed |
 | V14 | Dynamic planning and agent selection | Completed |
 | V15 | Evaluation, tracing, metrics, and observability | Completed |
-| V16 | Multi-stage human approval and interactive revision | Planned |
+| V16 | Multi-stage human approval and interactive revision | Completed |
 | V17 | User application, API, and deployment | Planned |
 
 See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version.
@@ -68,7 +68,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v15_evaluation_observability.py` | Observed V14 execution and evaluation | Records phase/model timings, task outcomes, planning metrics, citation integrity, and fixed offline evaluations |
 | `test_v15_evaluation_observability.py` | Observability regression tests | Runs 27 tests covering graph parity, retries, metrics, evidence checks, report persistence, and connection closure |
 | `docs/V15_GUIDE.md` | V15 evaluation scope and usage | Explains metrics, the offline benchmark, saved reports, trace inspection, and evaluation limits |
-| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V15 workflows and planned V16-V17 designs with detailed diagrams |
+| `study_guide_v16_human_approval.py` | Durable human review | Adds plan, content, and final review gates with bounded revisions and SQLite checkpoint resume |
+| `test_v16_human_approval.py` | Human-review regression tests | Runs 32 tests covering approvals, rejection, revisions, stale decisions, evidence checks, display correctness, and restart behavior |
+| `docs/V16_GUIDE.md` | V16 review and recovery guide | Explains review commands, approved task labels, revisions, saved sessions, and recovery limits |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V16 workflows and the planned V17 design with detailed diagrams |
 
 ## Requirements
 
@@ -135,6 +138,7 @@ python -m pip install -r requirements.txt
 | V13 | `python .\study_guide_v13_tool_using_agents.py` |
 | V14 | `python .\study_guide_v14_dynamic_planning.py` |
 | V15 | `python .\study_guide_v15_evaluation_observability.py` |
+| V16 | `python .\study_guide_v16_human_approval.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -189,6 +193,13 @@ Run the V15 offline benchmark and tests:
 ```powershell
 python .\study_guide_v15_evaluation_observability.py --benchmark
 python .\test_v15_evaluation_observability.py
+```
+
+Run V16 offline and test its review gates:
+
+```powershell
+python .\study_guide_v16_human_approval.py --offline
+python .\test_v16_human_approval.py
 ```
 
 ## Workflow Architecture
@@ -432,6 +443,40 @@ retrieval relevance, learner mastery, or completeness of an explanation. The
 five fixed cases are an offline regression suite, not a broad model-quality
 benchmark. See [the V15 guide](docs/V15_GUIDE.md) for precise definitions.
 
+## V16: Multi-stage Human Approval and Interactive Revision
+
+V16 uses LangGraph interrupts and SQLite checkpoints for three explicit review
+points: plan approval before tool execution, content approval before assessment
+preparation, and final approval before marking a session approved. A reviewer can
+approve, revise a task's arguments, reject with a reason, or pause and resume the
+saved session in a later process. Model planning may happen before plan review;
+tools run only after approval.
+
+Revisions return to plan review, clear earlier approvals and assessment questions,
+and invalidate changed tasks and their dependent results. Unchanged successful
+results can be retained. Up to three human revisions and eight tool executions
+are permitted across the session. Failed content cannot be approved; the reviewer
+must revise or reject it. Rejection ends the session and does not execute another
+tool. Stale review IDs and malformed decisions cannot advance a gate.
+
+Version `v16.2` displays each task's original request separately from the current
+approved task derived from its arguments. Evidence questions use that approved
+task, fixing the stale-label defect observed after revising `1 / 0` to `1 / 2`.
+Questions are deterministic evidence-review prompts, not a scored assessment or
+proof of learner mastery. Final approval does not update learner memory.
+
+The local database is `study_guide_v16_checkpoints.sqlite`; exclude it and sidecars
+with `study_guide_v16_checkpoints.sqlite*`. Resume a saved review using the exact
+session command printed by the CLI, preserving offline/model mode. Resume checks
+the implementation version and corpus digest. Older `v16.1` sessions remain
+stored but cannot resume under `v16.2` because their assessment format differs.
+
+These are resumable review checkpoints, unlike V14/V15 final run reports. Exactly-once
+execution after a crash inside a tool node is not guaranteed; the CLI refuses
+automatic replay when a session stopped outside a review gate. Use one local
+process per session. This is a local review workflow without authenticated reviewer
+identity or tamper-proof audit storage. See [the V16 guide](docs/V16_GUIDE.md).
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -523,6 +568,15 @@ The following V15 evidence was recorded:
 6. The live arithmetic result was `60 [T2]`; conversion returned `5000 m [T3]`. The researcher returned one cited Common forms of energy passage, which does not establish a complete explanation of conservation.
 7. Tests verify connection closure after successful reads/writes, missing-report errors, and duplicate-report rejection, addressing the Windows file-handle issue found in V14.
 
+The following V16 evidence was verified:
+
+1. All 32 tests passed on Windows in about 0.906 seconds after the revised-label correction.
+2. An offline two-task session paused at content review, exited, resumed in a new process, and received final approval with the execution count unchanged at two.
+3. Human revision corrected a division-by-zero task to `1 / 2`, cleared prior approvals, returned to plan review, and completed after a second execution. The runtime check exposed the stale original-task label, which was corrected in `v16.2` and covered by regression tests.
+4. A corrected `v16.2` model-mode run converted 5 km to 5000 m with one execution and all three review approvals. Model acceptance versus fallback is recorded in its checkpoint events and should be inspected separately.
+5. Tests cover rejection at every gate, stale review decisions, dependent-result invalidation, revision/execution budgets, evidence integrity, and model-call preservation during resume.
+6. Actual SQLite reopening and CLI pause/resume are tested, with explicit connection closure and file rename after the test connections close.
+
 ## Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
@@ -553,6 +607,8 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V14: Offline and Ollama runtime checks | Completed; exact workflow times were not recorded |
 | V15: Live compound run | 234.684 seconds, about 3 minutes 55 seconds |
 | V15: Fixed offline cases | About 0.196 to 0.711 milliseconds per case in the recorded run |
+| V16: Human-review tests | About 0.906 seconds for 32 tests on Windows |
+| V16: Review and model-mode sessions | Completed; total time including human review was not recorded |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -580,6 +636,9 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Separate execution completion and citation integrity from answer quality and semantic coverage.
 - Record actual model attempts and fallback events instead of inferring model success from the final result.
 - Evaluation pass rates need explicit expected outcomes and a clearly stated benchmark scope.
+- Keep approval gates separate from model and tool nodes so review resume does not repeat completed work.
+- Human revision must invalidate earlier approvals and results affected by changed task arguments.
+- Distinguish the original request from the currently approved task in result labels and assessment questions.
 - Human review remains useful when approval matters more than speed.
 - Local LLM output should still be checked for factual accuracy.
 
@@ -597,8 +656,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 | Project stage | Versions | Provenance |
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
-| Extended learning project | V3-V15 | New implementations developed for this repository |
-| Planned extensions | V16-V17 | Human control and deployment |
+| Extended learning project | V3-V16 | New implementations developed for this repository |
+| Planned extensions | V17 | User application, API, and deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 
