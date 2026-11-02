@@ -1,0 +1,13 @@
+**
+!Dockerfile.v17
+!requirements.txt
+!study_guide_v12_rag_citations.py
+!study_guide_v13_tool_using_agents.py
+!study_guide_v14_dynamic_planning.py
+!study_guide_v15_evaluation_observability.py
+!study_guide_v16_human_approval.py
+!study_guide_v17_app.py
+!trusted_documents/
+!trusted_documents/*.md
+!web_v17/
+!web_v17/*

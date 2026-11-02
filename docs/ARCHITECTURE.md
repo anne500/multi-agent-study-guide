@@ -2,8 +2,8 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V16 are implemented.
-- V17 is a planned design. Its diagram will be checked and updated when it is implemented.
+- V1-V17 are implemented.
+- V17 is verified for local browser and API use. Its optional Docker recipe has not been runtime-verified; public hosting is outside the implemented scope.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -17,7 +17,7 @@ This guide shows how the multi-agent study guide evolves from a simple Python pi
 | Reliability | V9-V10 | Structured outputs, fallbacks, and persistent recovery |
 | Context | V11-V13 | Long-term memory, retrieval, and tools |
 | Adaptation | V14-V16 | Dynamic planning, evaluation, and human control |
-| Delivery | V17 | Application, API, persistence, and deployment |
+| Delivery | V17 | Local application, asynchronous API, persisted reviews, and optional Docker recipe |
 
 ## V1: Plain Python sequential agents
 
@@ -430,20 +430,61 @@ and approval does not establish mastery or semantic entailment. See
 
 ## V17: Application and deployment
 
-**Status:** Planned
+**Status:** Implemented and locally verified; Docker execution unverified
 
-V17 will expose the workflow through a user application and API. The service architecture will combine local model inference, checkpoint state, learner memory, trusted retrieval, tools, and observability.
+V17 serves Review Studio and a same-origin JSON API through a local Python HTTP
+server. A single background worker serializes creation and review operations.
+POST returns 202 after queuing; GET polls a cached session view without invoking
+the model, tools, or graph. A slow model operation can delay other queued jobs.
 
 ```mermaid
 flowchart TD
-    A[Web or command-line client] --> B[Application API]
-    B --> C[Workflow service]
-    C --> D[Ollama model]
-    C --> E[(Checkpoints and memory)]
-    C --> F[(Trusted document index)]
-    C --> G[Approved tools]
-    C --> H[Evaluation and telemetry]
+    A[Browser or API client] -->|POST goal or decision| B[Local HTTP API]
+    B -->|Queue operation| C[Single background worker]
+    B -->|202 accepted| A
+    C --> D[V16 review graph]
+    D -->|Initial planning| E[Ollama or offline planner]
+    D -->|After plan approval| F[Trusted retrieval and approved tools]
+    D -->|Native checkpoints| G[(V17 SQLite store)]
+    C -->|Publish gate or terminal state| H[Cached session view]
+    H -->|Persist metadata| G
+    G -->|Load views at startup| H
+    A -->|GET status or export| H
+    H -->|Results and review state| A
 ```
+
+The graph reuses V14 task validation and execution, V12 trusted retrieval, V13
+bounded tools, and V15 metrics and trace wrappers. It pauses at V16's plan,
+content, and final gates. Revision invalidates affected results and clears
+approvals; rejecting ends the session. Reading or reopening a session does not
+advance a gate. A review ID binds each decision to its current state, while
+request IDs deduplicate accepted review submissions. Creation is not idempotent.
+
+`v17_data/sessions.sqlite` contains native graph checkpoints and web-session
+metadata. It is separate from V16's CLI database and V11's learner memory.
+V17 does not update learner memory, turn generated content into trusted facts,
+or import JSON exports as runnable sessions. Ignore the entire data directory.
+Recovery inspection reads a saved gate or terminal state without executing nodes;
+automatic replay after interruption outside a gate is refused. Crash-time
+exactly-once tool execution is not guaranteed.
+
+The service uses localhost by default, Host/Origin checks, a process-local write
+token, bounded JSON input, and fixed static-asset routes. The interface renders
+model and user text through textContent. These controls do not provide public
+authentication, multi-user isolation, or tamper-proof audit storage. One process
+owns each data directory. An optional non-root Docker recipe uses a named volume
+and publishes the host port only on loopback; the image has not been built or
+runtime-tested in the verified evidence.
+
+Verified evidence includes 25 API integration tests in the authoring environment,
+90 existing V14-V16 tests there, Windows browser approval of two offline tasks,
+and a human revision from `1 / 0` to `1 / 2` that completed with `0.5 [T2]`.
+The exported live Ollama session accepted its second model attempt after a first
+`OutputParserException`, recorded zero deterministic planning rounds, executed
+the converter once, returned `5 km = 5000 m [T1]`, and saved all three approvals.
+Planning took 526.872 seconds; the specialist phase took about 6.273 milliseconds.
+Human review time is excluded from these phase timings. See
+[the V17 guide](V17_GUIDE.md) for API and deployment details.
 
 ## Version relationships
 
@@ -459,4 +500,4 @@ flowchart TD
     F --> G[V17 Delivery]
 ```
 
-The architecture is intentionally incremental. V17 will be implemented as a separate version, tested, documented, and compared without replacing the earlier examples.
+The architecture is intentionally incremental. V17 adds the application layer as a separate version while preserving the earlier runnable examples. Local application verification does not establish production readiness or public deployment.

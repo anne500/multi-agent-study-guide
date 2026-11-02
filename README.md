@@ -2,7 +2,7 @@
 
 A versioned learning project that builds local multi-agent study-guide workflows with Python, LangGraph, Ollama, and the `qwen3.5:4b` model.
 
-The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, cross-session learner memory, trusted retrieval with verified citations, and controlled tool use.
+The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, cross-session learner memory, trusted retrieval with verified citations, controlled tool use, dynamic planning, observability, durable review, and a local browser application with a JSON API.
 
 All LLM calls run locally through Ollama. No paid API key is required.
 
@@ -26,9 +26,11 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V14 | Dynamic planning and agent selection | Completed |
 | V15 | Evaluation, tracing, metrics, and observability | Completed |
 | V16 | Multi-stage human approval and interactive revision | Completed |
-| V17 | User application, API, and deployment | Planned |
+| V17 | User application, API, and local deployment | Completed locally |
 
 See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version.
+
+V17 is verified as a local, single-user application. Its optional Docker recipe is supplied but has not yet been built or runtime-verified; public hosting is outside the implemented scope.
 
 ## What Is an Agent Here?
 
@@ -71,7 +73,13 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v16_human_approval.py` | Durable human review | Adds plan, content, and final review gates with bounded revisions and SQLite checkpoint resume |
 | `test_v16_human_approval.py` | Human-review regression tests | Runs 32 tests covering approvals, rejection, revisions, stale decisions, evidence checks, display correctness, and restart behavior |
 | `docs/V16_GUIDE.md` | V16 review and recovery guide | Explains review commands, approved task labels, revisions, saved sessions, and recovery limits |
-| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V16 workflows and the planned V17 design with detailed diagrams |
+| `study_guide_v17_app.py` | Local application and asynchronous API | Serves the browser UI, queues V16 workflow operations, and persists sessions in a separate SQLite store |
+| `test_v17_app.py` | HTTP and persistence integration tests | Runs 25 tests covering review gates, revisions, retries, restart, recovery, validation, references, export, and background planning |
+| `web_v17/` | Browser interface | Contains the HTML, CSS, and JavaScript for creating sessions and reviewing plans, results, and evidence |
+| `Dockerfile.v17` and `Dockerfile.v17.dockerignore` | Optional local container recipe | Defines a non-root image and a restricted build context; container execution remains unverified |
+| `docs/V17_GUIDE.md` | Application and API guide | Explains browser use, endpoints, persistence, recovery, verified runs, and deployment limits |
+| `V17_START_HERE.md` | Installation and validation walkthrough | Provides PowerShell setup and the offline, revision, and live-model browser checks |
+| `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V17 workflows and their actual components and routing |
 
 ## Requirements
 
@@ -139,6 +147,7 @@ python -m pip install -r requirements.txt
 | V14 | `python .\study_guide_v14_dynamic_planning.py` |
 | V15 | `python .\study_guide_v15_evaluation_observability.py` |
 | V16 | `python .\study_guide_v16_human_approval.py` |
+| V17 | `python .\study_guide_v17_app.py` |
 
 Run the controlled V8 revision demonstration:
 
@@ -201,6 +210,18 @@ Run V16 offline and test its review gates:
 python .\study_guide_v16_human_approval.py --offline
 python .\test_v16_human_approval.py
 ```
+
+Run the V17 integration tests, then start the browser application:
+
+```powershell
+python .\test_v17_app.py
+python .\study_guide_v17_app.py
+```
+
+Open http://127.0.0.1:8000 and keep the terminal running. Offline planning is
+selected by default. Uncheck it before creating a session to use Ollama. Review
+and approve the plan, content, and final evidence questions. The existing
+requirements are sufficient; V17 adds no package or frontend-build dependency.
 
 ## Workflow Architecture
 
@@ -477,6 +498,41 @@ automatic replay when a session stopped outside a review gate. Use one local
 process per session. This is a local review workflow without authenticated reviewer
 identity or tamper-proof audit storage. See [the V16 guide](docs/V16_GUIDE.md).
 
+## V17: Review Studio, JSON API, and Local Deployment
+
+V17 exposes V16's workflow through a local browser application and an asynchronous
+JSON API. Create sessions, inspect structured plans and results, approve each gate,
+revise a complete plan with a reason, reject a session, reopen a saved view, and
+export the session as JSON. Each task shows its original request and the current
+task derived from its approved arguments. Review questions remain unscored.
+
+The API queues model and workflow operations on one background worker and returns
+202. Reads poll the latest saved view without invoking the workflow. A slow model
+call can delay queued operations, while the HTTP API remains responsive. Review
+IDs reject stale decisions; request IDs prevent the same accepted submission from
+resuming a gate twice. Creation is not idempotent: inspect the session list after
+a lost creation response before creating another session.
+
+`v17_data/sessions.sqlite` stores web metadata and native LangGraph checkpoints.
+Ignore the entire `v17_data/` directory, including database sidecars. This store
+is separate from the V16 CLI database. Recovery inspection restores a saved review
+gate or terminal state without replaying interrupted execution. Corpus and version
+checks still apply. V17 does not update learner memory or import exported JSON as
+runnable sessions.
+
+The server binds to localhost by default, checks Host/Origin values, requires a
+process-local token for writes, limits JSON body size, and serves only its explicit
+static assets. These controls support local browser use; they do not authenticate
+users or provide multi-user isolation. The optional Docker recipe and named data
+volume are documented, with container execution explicitly unverified. See
+[the V17 guide](docs/V17_GUIDE.md).
+
+The live browser conversion run accepted an Ollama plan on attempt 2 after an
+`OutputParserException` on attempt 1. It used zero deterministic planning rounds,
+executed the converter once, returned `5 km = 5000 m [T1]`, and retained all three
+human approvals. Planning took 526.872 seconds, about 8 minutes 47 seconds. This
+is one verified workflow run, not a model-quality or latency benchmark.
+
 ## Validation and Reliability
 
 The following V10 paths were verified:
@@ -577,9 +633,20 @@ The following V16 evidence was verified:
 5. Tests cover rejection at every gate, stale review decisions, dependent-result invalidation, revision/execution budgets, evidence integrity, and model-call preservation during resume.
 6. Actual SQLite reopening and CLI pause/resume are tested, with explicit connection closure and file rename after the test connections close.
 
+The following V17 evidence was verified:
+
+1. All 25 authoring-environment tests passed with real loopback HTTP requests and native SQLite checkpoints, without Ollama calls. The 90 existing V14-V16 tests also passed there.
+2. The Windows browser offline calculation/conversion session reached approved with two completed tasks, two tool attempts, and zero model attempts.
+3. A fresh Windows browser revision test corrected `1 / 0` to `1 / 2`, returned `0.5 [T2]`, and reached approved at revision 1 with two cumulative tool attempts. The earlier session that exhausted three revisions was rejected.
+4. The exported live-model session recorded `plan_retry` with `OutputParserException`, then `model_plan` on attempt 2. It recorded one accepted model plan, two model attempts, and zero deterministic planning rounds.
+5. That live session returned `5 km = 5000 m [T1]` with one completed task, one execution, zero human revisions, three saved approvals, no pending review, and no session error.
+6. A separate service test loaded the actual two trusted documents (14 chunks), completed three tasks through all approvals, and passed reference-ID integrity checks.
+7. API tests cover stale and duplicate decisions, request-ID conflicts, restart persistence, recovery inspection without execution, corpus mismatch, input limits, local write protections, export, and connection closure.
+8. Browser screenshots verify rendering and interactions; automated browser tests were not run. The Docker image and public deployment remain unverified. All 25 V17 tests also passed on Windows in 3.849 seconds.
+
 ## Observed Local Timings
 
-Performance varies with hardware, prompt length, output length, and Ollama scheduling. These measurements came from one development machine.
+Performance varies with hardware, prompt length, output length, and Ollama scheduling. Runtime measurements were recorded on the Windows laptop; V17 test timings below came from the separate authoring environment and are not directly comparable.
 
 | Version | Observed workflow time |
 |---|---:|
@@ -609,6 +676,9 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V15: Fixed offline cases | About 0.196 to 0.711 milliseconds per case in the recorded run |
 | V16: Human-review tests | About 0.906 seconds for 32 tests on Windows |
 | V16: Review and model-mode sessions | Completed; total time including human review was not recorded |
+| V17: Live converter planning | 526.872 seconds, about 8 minutes 47 seconds, including one model retry |
+| V17: Converter execution phase | About 6.273 milliseconds for the observed specialist phase; not a per-tool benchmark |
+| V17: API integration tests | 25 tests in about 1.733 seconds in the authoring environment |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -640,6 +710,9 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - Human revision must invalidate earlier approvals and results affected by changed task arguments.
 - Distinguish the original request from the currently approved task in result labels and assessment questions.
 - Human review remains useful when approval matters more than speed.
+- A responsive web API can queue slow model work while preserving explicit human execution gates.
+- Model mode alone does not prove model-plan acceptance; inspect retry and fallback events.
+- A process-local browser write token is not user authentication or multi-user isolation.
 - Local LLM output should still be checked for factual accuracy.
 
 ## Project Origin and Extension History
@@ -657,7 +730,7 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
 | Extended learning project | V3-V16 | New implementations developed for this repository |
-| Planned extensions | V17 | User application, API, and deployment |
+| Application delivery | V17 | Local browser UI, asynchronous JSON API, persisted review sessions, and an optional unverified Docker recipe |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 

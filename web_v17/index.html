@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A local workspace for planning, evidence, and human review.">
+  <title>Review Studio | Study Guide V17</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Review Studio home"><span class="mark">R</span> Review Studio</a>
+    <p class="eyebrow muted">MULTI-AGENT STUDY GUIDE</p>
+    <button id="new-session" class="button light">+ New session</button>
+    <div class="sidebar-heading"><h2>Your sessions</h2><button id="refresh" class="text-button">Refresh</button></div>
+    <nav id="sessions" aria-label="Saved sessions"><p class="muted">Loading sessions...</p></nav>
+    <div class="sidebar-footer"><span class="dot"></span> Local workspace <span class="version">V17</span><p>Saved on this computer.<br>No learner-memory updates.</p></div>
+  </aside>
+  <main>
+    <header class="topbar"><span>WORKSPACE / HUMAN REVIEW</span><span class="local-badge">LOCAL</span></header>
+    <div id="notice" role="status" aria-live="polite" hidden></div>
+    <section id="create-view">
+      <p class="eyebrow accent">A LITTLE STRUCTURE. A CLEARER ANSWER.</p>
+      <h1>Start with a question.<br>Stay in control.</h1>
+      <p class="intro">Choose a goal, review the plan, then check the evidence.<br>Every approval is yours.</p>
+      <form id="create-form" class="panel compose">
+        <label for="goal">What would you like to work on?</label>
+        <textarea id="goal" required maxlength="2000" rows="4" placeholder="Explain conservation of energy; Calculate (12 + 8) * 3; Convert 5 km to m"></textarea>
+        <p class="hint">Separate requests with semicolons. Up to four tasks per session.</p>
+        <div class="compose-bottom"><label class="toggle-label"><input id="offline" type="checkbox" checked> Offline planning <span class="hint">No model call</span></label><button id="create" class="button primary" type="submit">Create a plan <span aria-hidden="true">↗</span></button></div>
+        <p id="mode-help" class="hint">Uses the deterministic planner and approved local tools.</p>
+      </form>
+      <div class="explain-grid">
+        <article><span class="step-number">01</span><h2>Review the plan</h2><p>Check the selected specialists and their arguments before tools run.</p></article>
+        <article><span class="step-number">02</span><h2>Inspect the evidence</h2><p>Read results and source references. Revise a task when it needs correction.</p></article>
+        <article><span class="step-number">03</span><h2>Make the final call</h2><p>Approve the session, reject it, or leave and continue from its saved gate.</p></article>
+      </div>
+    </section>
+    <section id="session-view" hidden>
+      <div class="session-title"><div><p id="session-mode" class="eyebrow accent"></p><h1>Review workspace</h1></div><a id="export" class="button secondary" download>Export JSON</a></div>
+      <p id="session-goal" class="goal-text"></p>
+      <div id="gate-steps" class="gate-steps" aria-label="Review progress"></div>
+      <div class="workspace-grid">
+        <div>
+          <section class="panel"><div class="panel-title"><h2>Execution plan</h2><span id="revision" class="pill"></span></div><div id="tasks"></div></section>
+          <section id="evidence-panel" class="panel" hidden><div class="panel-title"><h2>Evidence review</h2><span class="pill">Not a scored quiz</span></div><ol id="assessment"></ol></section>
+          <section id="sources-panel" class="panel" hidden><h2>Retrieved sources</h2><div id="sources"></div><p class="hint">Reference integrity does not establish semantic entailment.</p></section>
+          <details class="panel technical"><summary>Plan, audit, and trace</summary><pre id="details"></pre></details>
+        </div>
+        <aside class="review-column">
+          <section class="panel review-card"><span class="eyebrow accent">YOUR NEXT STEP</span><h2 id="gate-heading"></h2><p id="gate-description"></p><p id="review-message" class="hint"></p>
+            <div id="review-actions"><button id="approve" class="button primary full">Approve &amp; continue</button><button id="revise" class="button secondary full">Revise plan</button><button id="reject" class="text-button danger full">Reject session</button></div>
+            <button id="recover" class="button secondary full" hidden>Inspect saved checkpoint</button>
+            <button id="leave" class="text-button full">Leave workspace</button>
+            <p class="hint">Each review gate is saved automatically. Reopening it does not repeat completed tools.</p>
+          </section>
+          <section class="panel"><h2>Session activity</h2><dl id="metrics" class="metrics"></dl><p id="session-id" class="hint id-text"></p></section>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <dialog id="decision-dialog">
+    <form id="decision-form"><h2 id="dialog-title"></h2><p id="dialog-help" class="hint"></p>
+      <label for="reason">Reason</label><textarea id="reason" rows="2" maxlength="1000" required></textarea>
+      <div id="plan-editor"><label for="replacement">Replacement plan (JSON)</label><textarea id="replacement" rows="14" spellcheck="false"></textarea><p class="hint">Edit task arguments. Keep the original instruction as context. Changed results and approvals will be invalidated.</p></div>
+      <p id="dialog-error" role="alert" class="error"></p>
+      <div class="dialog-actions"><button id="cancel-dialog" type="button" class="button secondary">Cancel</button><button type="submit" class="button primary">Submit for review</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
