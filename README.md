@@ -34,6 +34,8 @@ See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflo
 
 V17 is verified as a local, single-user application both directly on Windows and in a Linux Docker container. Docker build, health checks, browser execution, host Ollama access, live model planning, and completed-session retention across container replacement were verified. Public hosting is outside the implemented scope.
 
+The [verified CI run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41578448362) passed on Windows and Linux with Python 3.12 and 3.14, including Docker pending-review persistence. The V17 release candidate uses [requirements-v17.lock](requirements-v17.lock) for exact package versions and a fixed Docker base digest. See the [release guide](docs/RELEASE_GUIDE.md) for the manual, CI-gated v17.0.0 publication workflow and its verification limits.
+
 ## What Is an Agent Here?
 
 In this project, an agent is a focused LLM call with:
@@ -86,6 +88,9 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `scripts/ci_checks.py` | Portable verification runner | Compiles project Python files and runs each root regression script in a separate process |
 | `scripts/docker_smoke.py` | Container integration check | Uses temporary test resources to verify readiness, trusted retrieval, API gates, export, and pending-review resume across replacement |
 | `docs/CI_GUIDE.md` | CI scope and reproduction | Explains triggers, jobs, local commands, diagnostics, and verification limits |
+| `requirements-v17.lock` | Tested dependency baseline | Pins 43 package versions captured from all four passing CI environments |
+| `.github/workflows/release-v17.yml` | Manual release publication | Reuses all five CI jobs, then creates v17.0.0 and publishes source, checksums, and verification evidence |
+| `docs/RELEASE_GUIDE.md` | Baseline and release procedure | Documents platform evidence, publication steps, recovery, and maintenance |
 
 ## Requirements
 
@@ -130,7 +135,8 @@ source .venv/bin/activate
 ### 4. Install dependencies
 
 ```powershell
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-v17.lock
+python -m pip check
 ```
 
 ## Running the Examples
@@ -236,7 +242,7 @@ dispatch. Four jobs cover Python 3.12 and 3.14 on Ubuntu 24.04 and Windows 2025.
 Each compiles the project and runs all root test_v*.py scripts in independent
 processes, including V10's assertion-based fallback check. No Ollama model or
 API key is required for these checks. Dependencies are installed from the
-existing requirements.txt and the resolved package versions are recorded in logs.
+exact requirements-v17.lock baseline, checked with pip check, and recorded in logs.
 
 After those jobs pass, a Linux job builds Dockerfile.v17 and checks the API
 through a fixture container and named volume. It verifies that tools wait for
@@ -250,10 +256,10 @@ is not used by this check.
 Run the offline checks locally with `python scripts/ci_checks.py`. Run the Docker
 probe beside the normal app with `python scripts/docker_smoke.py --image
 study-guide:v17 --port 8001` after building that image. See
-[the CI guide](docs/CI_GUIDE.md) for commands and limits. Local validation does
-not establish that the hosted workflow is green; confirm the first run on
-[GitHub Actions](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml)
-after committing these files. The V1-V17 roadmap is preserved.
+[the CI guide](docs/CI_GUIDE.md) for commands and limits. The first hosted run
+passed all five jobs; the pinned baseline must pass a new run after it is pushed.
+The separate manual Release V17 workflow reuses the full CI suite for its exact
+commit before publishing the tag and source assets. The V1-V17 roadmap is preserved.
 
 ## Workflow Architecture
 
@@ -685,7 +691,7 @@ The following V17 evidence was verified:
 9. The Docker image built successfully in 61.9 seconds using Python 3.12-slim on Linux/amd64. The container reached healthy and served the browser application.
 10. Container-to-host Ollama access returned the installed qwen3.5:4b model. The exported container session recorded one accepted model plan on attempt 2, one parser retry, zero deterministic planning rounds, one converter execution, and all three human approvals.
 11. The original container was removed and recreated with the same study-guide-v17-data volume mounted at /data. The API comparison returned ContainerReplaced=True, Status=approved, ToolExecutions=1, Approvals=3, and SnapshotUnchanged=True.
-12. The Docker runtime check verifies a completed session surviving replacement; it does not establish crash-time exactly-once execution or a manually resumed pending gate inside Docker. Public deployment, LAN isolation, and automated container browser tests were not verified. Build-specific ignore enforcement on the older tested builder was not separately established.
+12. The manual Docker runtime check verified a completed session surviving replacement. The subsequent hosted CI probe also verified an unchanged pending content-review snapshot across replacement, review resume, stale-decision rejection, and duplicate-decision preservation. These checks do not establish crash-time exactly-once execution. Public deployment, LAN isolation, and automated container browser tests were not verified. Build-specific ignore enforcement on the older tested builder was not separately established.
 
 ## Observed Local Timings
 

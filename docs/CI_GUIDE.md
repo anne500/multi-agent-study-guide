@@ -1,10 +1,10 @@
 # Continuous integration
 
-CI protects the implemented V1-V17 project. It does not introduce a V18 workflow or publish a release, image, or website.
+CI protects the implemented V1-V17 project. It does not introduce a V18 workflow or publish an image or website. Regular CI does not publish releases. The separate manual Release V17 workflow calls this CI workflow and publishes v17.0.0 only after all five jobs succeed for its commit.
 
 ## Triggers and jobs
 
-The workflow in .github/workflows/ci.yml runs on pushes to main, pull requests targeting main, and workflow_dispatch. It has read-only contents permission. Action revisions are pinned to verified full commit SHAs, and checkout does not persist Git credentials. A newer run on the same ref cancels an older run. Public pull-request code runs with pull_request, not pull_request_target.
+The workflow in .github/workflows/ci.yml runs on pushes to main, pull requests targeting main, workflow_dispatch, and workflow_call. It has read-only contents permission. Action revisions are pinned to verified full commit SHAs, and checkout does not persist Git credentials. A newer run on the same ref cancels an older run. Public pull-request code runs with pull_request, not pull_request_target.
 
 | Job | Environment | Verification |
 | --- | --- | --- |
@@ -37,11 +37,11 @@ For the same two phases used by Actions:
 .\.venv\Scripts\python.exe scripts/ci_checks.py --tests-only
 ```
 
-The workflow installs existing requirement ranges, caches pip downloads, and records python --version and pip freeze in logs. This detects dependency drift but does not lock dependencies. A reproducible dependency baseline and tagged release remain a separate next step.
+The workflow installs requirements-v17.lock, which includes the supported direct requirement ranges and pins 43 package versions captured from the first green matrix. It runs pip check, caches pip downloads using both requirement files, and records python --version and pip freeze in logs. requirements.txt remains the deliberate update input. See RELEASE_GUIDE.md for the baseline scope and update procedure.
 
 ## Docker smoke scenario
 
-The Docker job builds the existing Dockerfile.v17. The host probe uses Python's standard library and the Docker CLI; it does not install project packages on the host. The image installs the project requirements.
+The Docker job builds Dockerfile.v17 with the Python base digest captured from the first green Docker job. The host probe uses Python's standard library and the Docker CLI; it does not install project packages on the host. The image installs requirements-v17.lock and runs pip check. Dockerfile.v17.dockerignore includes both requirement files.
 
 scripts/docker_smoke.py creates a fixture named study-guide-ci followed by a random identifier, with a similarly unique named volume mounted at /data. It does not use study-guide-v17 or study-guide-v17-data. Its finally block attempts to print container logs and remove only its fixture container and volume on success or failure. A forcibly cancelled job may prevent finally from finishing; hosted runner resources are ephemeral, while a locally interrupted run may leave uniquely named test resources to inspect.
 
@@ -79,7 +79,7 @@ Inspect the first failing step and its logs before rerunning. Dependency failure
 
 Workflow YAML, action inputs and pinned revisions, and Python syntax were checked in the authoring environment. On Linux with Python 3.12.14, all eight regression scripts passed in about 5.93 seconds: 172 unittest cases plus V10's assertion-based fallback script. A fresh task virtual environment installed the existing requirement ranges; no project requirement file changed. The authoring host additionally needed HTTPX's optional SOCKS dependency for its ambient proxy configuration. That environment-specific addition is not part of the workflow's dependency requirements.
 
-The smoke scenario passed against the real V17 HTTP API and native SQLite checkpoints with service replacement standing in for container replacement. It retained the pending snapshot, refreshed the server token, rejected a stale decision, resumed review, and reached approved with three executions, three approvals, and zero model attempts. That verifies the probe's API logic; it is not evidence that Docker commands ran here. Docker is unavailable in the authoring environment. The hosted matrix and automated Docker job remain unverified until the first Actions run is green.
+The smoke scenario passed against the real V17 HTTP API and native SQLite checkpoints with service replacement standing in for container replacement. It retained the pending snapshot, refreshed the server token, rejected a stale decision, resumed review, and reached approved with three executions, three approvals, and zero model attempts. That verifies the probe's API logic; it is not evidence that Docker commands ran here. Docker is unavailable in the authoring environment. The [first hosted run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41578448362) subsequently passed all five jobs at commit 01c1b245549d09c24c82de5ccda1283cf8ec8316. All eight scripts passed in each environment: Ubuntu/Python 3.12 in 6.78 seconds, Ubuntu/3.14 in 7.58 seconds, Windows/3.12 in 14.56 seconds, and Windows/3.14 in 19.71 seconds. The actual Docker job reached approved with three executions and approvals, zero model attempts, unchanged pending state, stale-decision rejection, duplicate-decision preservation, a replaced container, a retained volume, and healthy status. The newly pinned baseline and release workflow require their own hosted verification after being pushed.
 
 References:
 

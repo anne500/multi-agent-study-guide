@@ -1,6 +1,7 @@
 **
 !Dockerfile.v17
 !requirements.txt
+!requirements-v17.lock
 !study_guide_v12_rag_citations.py
 !study_guide_v13_tool_using_agents.py
 !study_guide_v14_dynamic_planning.py

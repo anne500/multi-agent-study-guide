@@ -1,8 +1,8 @@
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 V17_DATA_DIR=/data
 WORKDIR /app
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-v17.lock ./
+RUN pip install --no-cache-dir -r requirements-v17.lock && pip check
 RUN useradd --uid 10001 --create-home appuser && mkdir /data && chown appuser:appuser /data
 COPY study_guide_v12_rag_citations.py study_guide_v13_tool_using_agents.py study_guide_v14_dynamic_planning.py study_guide_v15_evaluation_observability.py study_guide_v16_human_approval.py study_guide_v17_app.py ./
 COPY trusted_documents/ ./trusted_documents/

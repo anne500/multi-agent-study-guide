@@ -1,0 +1,91 @@
+name: Release V17
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-v17
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  publish:
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: v17.0.0
+      RELEASE_DIR: ${{ runner.temp }}/v17-release
+    steps:
+      - name: Check out the verified commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Assemble source and verification evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RELEASE_DIR"
+          git archive --format=zip --prefix="multi-agent-study-guide-$RELEASE_TAG/" \
+            --output="$RELEASE_DIR/multi-agent-study-guide-$RELEASE_TAG.zip" "$GITHUB_SHA"
+          cp requirements-v17.lock "$RELEASE_DIR/requirements-v17.lock"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          evidence = {
+              "tag": os.environ["RELEASE_TAG"],
+              "commit": os.environ["GITHUB_SHA"],
+              "workflow_run": f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+              "workflow_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "verification": "Reusable CI succeeded for this commit before publication",
+              "offline_matrix": {"os": ["ubuntu-24.04", "windows-2025"], "python": ["3.12", "3.14"]},
+              "offline_scripts": 8,
+              "unittest_cases": 172,
+              "additional_assertion_script": "test_v10_reviewer_fallback.py",
+              "docker": "Build, health, API review, and pending snapshot across replacement",
+              "live_model_quality": "Not evaluated by release CI",
+          }
+          path = Path(os.environ["RELEASE_DIR"]) / "release-evidence.json"
+          path.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+          PY
+          cd "$RELEASE_DIR"
+          sha256sum "multi-agent-study-guide-$RELEASE_TAG.zip" requirements-v17.lock release-evidence.json > SHA256SUMS.txt
+          sha256sum --check SHA256SUMS.txt
+      - name: Create the tag and publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          main_sha=$(gh api "repos/$GH_REPO/git/ref/heads/main" --jq '.object.sha')
+          if [ "$main_sha" != "$GITHUB_SHA" ]; then
+            echo "main advanced during verification. Run Release V17 again from main."
+            exit 1
+          fi
+          # Creating a ref fails if it exists; never move an existing tag.
+          gh api --method POST "repos/$GH_REPO/git/refs" \
+            -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$GITHUB_SHA"
+          gh release create "$RELEASE_TAG" --verify-tag --target "$GITHUB_SHA" \
+            --title "V17.0.0: Review Studio and verified local deployment" \
+            --notes-file docs/releases/v17.0.0.md \
+            "$RELEASE_DIR/multi-agent-study-guide-$RELEASE_TAG.zip" \
+            "$RELEASE_DIR/requirements-v17.lock" \
+            "$RELEASE_DIR/release-evidence.json" \
+            "$RELEASE_DIR/SHA256SUMS.txt"
