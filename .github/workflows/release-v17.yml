@@ -26,7 +26,6 @@ jobs:
       contents: write
     env:
       RELEASE_TAG: v17.0.0
-      RELEASE_DIR: ${{ runner.temp }}/v17-release
     steps:
       - name: Check out the verified commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -38,6 +37,8 @@ jobs:
           python-version: '3.12'
       - name: Assemble source and verification evidence
         shell: bash
+        env:
+          RELEASE_DIR: ${{ runner.temp }}/v17-release
         run: |
           set -euo pipefail
           mkdir -p "$RELEASE_DIR"
@@ -70,6 +71,7 @@ jobs:
       - name: Create the tag and publish the release
         shell: bash
         env:
+          RELEASE_DIR: ${{ runner.temp }}/v17-release
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
