@@ -80,25 +80,87 @@ After a process stops during a queued/running job, startup marks that session re
 
 Stop the service before copying the entire data directory for backup. Preserve the SQLite database and any sidecars together. Do not copy a live database file alone or edit checkpoint tables manually. This app does not automatically save generated material into trusted documents or update learner memory.
 
-## Optional local Docker deployment
+## Verified local Docker deployment
 
-The Docker recipe is supplied for local deployment and has not been built in the authoring environment. The Python service and HTTP tests run directly there. Validate the image on a machine with Docker before claiming container deployment is verified.
+The recipe was built and runtime-verified on the Windows laptop using Docker Desktop 4.17.0 and Docker Engine 20.10.23 with Linux/amd64 containers. The build completed in about 61.9 seconds. This records the environment used; it is not a recommendation to retain that older Docker release. The authoring environment did not run Docker.
 
-Use Docker Desktop with Linux containers. From the existing repository:
+Start Docker Desktop and confirm docker version shows both Client and Server. Use Linux containers. Stop the direct Python web server before using the same host port. From the existing repository:
 
 ```powershell
 docker build -f Dockerfile.v17 -t study-guide:v17 .
-docker run --rm --name study-guide-v17 `
+docker run -d --name study-guide-v17 `
   -p 127.0.0.1:8000:8000 `
-  -v study-guide-v17-data:/data `
+  --mount type=volume,source=study-guide-v17-data,target=/data `
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 `
   study-guide:v17
 ```
 
-Open http://127.0.0.1:8000 and repeat the offline approval test. The image runs as a non-root user, copies the required version modules and trusted documents, and stores sessions in a named volume. Dockerfile.v17.dockerignore limits the build context to the required source files; local sessions and other repository files are excluded. Existing dependency ranges are used rather than a lockfile. Model weights are not included.
+The service runs in the background. Keep Docker Desktop running. Check readiness:
 
-For a model session against the host's Ollama, add `-e OLLAMA_BASE_URL=http://host.docker.internal:11434` to docker run. Docker Desktop documents host.docker.internal for reaching host services. Host firewall and Ollama binding must permit that connection; it is not guaranteed by the image. Prefer verifying offline operation first. Do not expose Ollama broadly to fix connectivity without considering access control. The normal direct Python launch uses the laptop's existing loopback Ollama connection.
+```powershell
+docker ps --filter "name=study-guide-v17"
+docker inspect --format '{{.State.Health.Status}}' study-guide-v17
+docker logs --tail 30 study-guide-v17
+```
 
-The application binds to 0.0.0.0 inside the container, with the host port published only on 127.0.0.1. Keep the same host/container port because allowed Host and Origin values use the service's listening port. The Host allowlist continues to restrict clients to the local URL. The recipe does not implement public hosting, HTTPS, authentication, multi-user isolation, multiple workers, or production supervision. Those require a separate deployment design. The Python standard-library server is intended for this local, single-user project.
+The health check runs every 30 seconds. A new container can initially report starting; wait for healthy before testing. Open http://127.0.0.1:8000, reload the page, and click New session. The named volume has its own session history and does not automatically contain the direct Python server's sessions. Repeat the offline calculation/conversion workflow and inspect both results before completing the three approvals.
+
+The Dockerfile specifies the non-root appuser (UID 10001), explicitly copies the required version modules, assets, and trusted documents, and stores sessions in the named volume. Existing dependency ranges are used rather than a lockfile. Model weights are not included.
+
+Dockerfile.v17.dockerignore declares build-specific exclusion rules. The recorded older builder reported a 2-byte .dockerignore transfer, so enforcement of the build-specific ignore file was not established by this test. The explicit COPY instructions determine the files included in the image; successful runtime verification does not establish build-context isolation. Review ignore-file behavior separately before using a build context containing sensitive material.
+
+The run command configures the container to reach the host's Ollama through host.docker.internal. This path was verified on the laptop without changing the host Ollama binding. Probe it before starting a model session:
+
+```powershell
+docker exec study-guide-v17 python -c "import json,urllib.request; r=urllib.request.urlopen('http://host.docker.internal:11434/api/tags',timeout=10); print([m['name'] for m in json.load(r)['models']])"
+```
+
+The verified response included qwen3.5:4b. This checks model availability without running inference. In the browser, create a new conversion session with Offline planning unchecked, approve each gate after inspection, and export JSON. Check snapshot.state.events for model_plan and the accepted attempt, and metrics for deterministic_plan_rounds. A correct tool result alone does not prove that the model plan was accepted. Host firewall and binding requirements can differ on another machine.
+
+The application binds to 0.0.0.0 inside the container, with the host port bound to 127.0.0.1. Keep the same host/container port because allowed Host and Origin values use the service's listening port. The Host allowlist restricts accepted HTTP Host values; it is not authentication. LAN isolation was not tested. Docker's port-publishing documentation notes that releases before 28.0.0 can expose loopback-published ports to peers on the same network segment; the recorded engine predates that fix. Do not treat this functional test as proof of network isolation.
+
+The recipe does not implement public hosting, HTTPS, authentication, multi-user isolation, multiple workers, or production supervision. Those require a separate deployment design. The Python standard-library server is intended for this local, single-user project.
+
+### Verify retention across container replacement
+
+Use a completed session while no workflow operation is running. In one PowerShell window, capture its current view and the current container ID. The verified session ID below is specific to the recorded run; replace it with a session from your own volume when repeating this check.
+
+```powershell
+$v17Url = "http://127.0.0.1:8000/api/sessions/382dd7d5a50b4b2094aab903dacc7664"
+$v17Before = Invoke-RestMethod $v17Url -ErrorAction Stop
+$v17OldContainer = docker inspect --format '{{.Id}}' study-guide-v17
+
+docker stop study-guide-v17
+docker rm study-guide-v17
+
+docker run -d --name study-guide-v17 `
+  -p 127.0.0.1:8000:8000 `
+  --mount type=volume,source=study-guide-v17-data,target=/data `
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 `
+  study-guide:v17
+```
+
+Keep this PowerShell window open so the captured variables remain available. Wait until docker inspect reports healthy, then compare:
+
+```powershell
+$v17After = Invoke-RestMethod $v17Url -ErrorAction Stop
+$v17NewContainer = docker inspect --format '{{.Id}}' study-guide-v17
+
+[PSCustomObject]@{
+    ContainerReplaced = ($v17OldContainer -ne $v17NewContainer)
+    Status = $v17After.job_status
+    ToolExecutions = $v17After.snapshot.state.executions
+    Approvals = @($v17After.snapshot.state.approvals.PSObject.Properties).Count
+    SnapshotUnchanged = (
+        ($v17Before.snapshot | ConvertTo-Json -Depth 100 -Compress) -eq
+        ($v17After.snapshot | ConvertTo-Json -Depth 100 -Compress)
+    )
+}
+```
+
+The recorded result was ContainerReplaced=True, Status=approved, ToolExecutions=1, Approvals=3, and SnapshotUnchanged=True. The container ID changed from 4cf9517d8efe to 102d7f87fd78 while the same study-guide-v17-data volume remained mounted at /data. Reload the browser after replacement to obtain a new write token.
+
+This proves retention of the completed session across removal and recreation. It does not prove manually resumed pending-gate behavior inside Docker or recovery after interruption midway through a tool. Automated API tests cover gate resume and service restart separately. Removing the named volume would remove that persisted history; retain it when replacing the container.
 
 References for the recipe:
 
@@ -106,6 +168,8 @@ References for the recipe:
 - [Docker port publishing](https://docs.docker.com/engine/network/port-publishing/)
 - [Docker build context and ignore files](https://docs.docker.com/build/concepts/context/#dockerignore-files)
 - [Ollama configuration FAQ](https://docs.ollama.com/faq)
+- [Ollama model-list API](https://docs.ollama.com/api/tags)
+- [Docker volumes and their lifecycle](https://docs.docker.com/engine/storage/volumes/)
 
 ## Verification
 
@@ -121,4 +185,8 @@ Planning duration was 526872.357 ms, about 8 minutes 47 seconds. The first model
 
 Report model acceptance using the explicit counts: one accepted plan from two model attempts, with one retry and no fallback. The inherited model_plan_acceptance_rate field is round-based: accepted model plans divided by accepted-model plus deterministic planning rounds. Its value of 1.0 in this export does not mean both attempts succeeded. The per-attempt acceptance fraction for this run is 1/2. Read events and counts alongside the ratio.
 
-The local V17 application and its live-model approval path are now verified. The Docker image and public deployment remain unverified; neither is claimed as completed deployment evidence. All 25 V17 tests passed on Windows in 3.849 seconds. An explicit manual server-restart test has not yet been supplied. Automated API tests already cover service restart and checkpoint recovery. Retain those distinctions when recording project results.
+All 25 V17 tests passed on Windows in 3.849 seconds. Those are host-run tests; they were not run inside the container image. Docker deployment was verified separately through the build log, healthy status, manual browser execution, container-to-host Ollama probe, live session export, and before/after API snapshot comparison across container replacement.
+
+The Docker-hosted model session `382dd7d5a50b4b2094aab903dacc7664` accepted model attempt 2 after an OutputParserException on attempt 1. It recorded zero deterministic planning rounds and returned `5 km = 5000 m [T1]` with one execution, revision 0, all three approvals, approved status, and no pending review. Planning took 479237.247 ms, about 7 minutes 59 seconds; the specialist phase took 6.726 ms. These phase timings exclude human review and are not representative performance benchmarks.
+
+The completed-session snapshot was unchanged after container replacement. Pending-gate resume inside Docker, arbitrary crash recovery, LAN isolation, build-specific ignore enforcement on the older builder, and public deployment were not established by this manual test. The local application and functional local Docker deployment are verified within that scope.

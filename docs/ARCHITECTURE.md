@@ -3,7 +3,7 @@
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
 - V1-V17 are implemented.
-- V17 is verified for local browser and API use. Its optional Docker recipe has not been runtime-verified; public hosting is outside the implemented scope.
+- V17 is verified for local browser and API use, including Linux Docker deployment with host Ollama and named-volume retention across container replacement. Public hosting is outside the implemented scope.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -17,7 +17,7 @@ This guide shows how the multi-agent study guide evolves from a simple Python pi
 | Reliability | V9-V10 | Structured outputs, fallbacks, and persistent recovery |
 | Context | V11-V13 | Long-term memory, retrieval, and tools |
 | Adaptation | V14-V16 | Dynamic planning, evaluation, and human control |
-| Delivery | V17 | Local application, asynchronous API, persisted reviews, and optional Docker recipe |
+| Delivery | V17 | Local application, asynchronous API, persisted reviews, and verified local Docker deployment |
 
 ## V1: Plain Python sequential agents
 
@@ -430,7 +430,7 @@ and approval does not establish mastery or semantic entailment. See
 
 ## V17: Application and deployment
 
-**Status:** Implemented and locally verified; Docker execution unverified
+**Status:** Implemented and verified directly on Windows and in Linux Docker
 
 V17 serves Review Studio and a same-origin JSON API through a local Python HTTP
 server. A single background worker serializes creation and review operations.
@@ -472,9 +472,12 @@ The service uses localhost by default, Host/Origin checks, a process-local write
 token, bounded JSON input, and fixed static-asset routes. The interface renders
 model and user text through textContent. These controls do not provide public
 authentication, multi-user isolation, or tamper-proof audit storage. One process
-owns each data directory. An optional non-root Docker recipe uses a named volume
-and publishes the host port only on loopback; the image has not been built or
-runtime-tested in the verified evidence.
+owns each data directory. The verified Docker image runs as a non-root user,
+publishes port 8000 on 127.0.0.1, mounts study-guide-v17-data at /data, and reaches
+the host's Ollama through host.docker.internal. Windows direct-launch sessions
+and Docker-volume sessions have separate stores. Host-port binding was verified;
+LAN isolation and build-specific ignore enforcement were not separately tested
+on the older Docker builder.
 
 Verified evidence includes 25 API integration tests in the authoring environment,
 90 existing V14-V16 tests there, Windows browser approval of two offline tasks,
@@ -485,6 +488,16 @@ the converter once, returned `5 km = 5000 m [T1]`, and saved all three approvals
 Planning took 526.872 seconds; the specialist phase took about 6.273 milliseconds.
 Human review time is excluded from these phase timings. See
 [the V17 guide](V17_GUIDE.md) for API and deployment details.
+
+The Docker build completed in about 61.9 seconds and the container reported
+healthy. A Docker-hosted conversion run accepted model attempt 2 after an initial
+parser error, with zero deterministic planning rounds, one execution, three saved
+approvals, and `5 km = 5000 m [T1]`. Its planning phase took 479.237 seconds and
+the specialist phase took 6.726 milliseconds. The container was then removed and
+recreated with the same named volume. The API comparison confirmed a different
+container ID, approved status, one execution, three approvals, and an unchanged
+saved snapshot. This demonstrates completed-session retention across replacement;
+pending-gate resume inside Docker was not manually verified by that comparison.
 
 ## Version relationships
 

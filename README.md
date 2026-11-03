@@ -26,11 +26,11 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V14 | Dynamic planning and agent selection | Completed |
 | V15 | Evaluation, tracing, metrics, and observability | Completed |
 | V16 | Multi-stage human approval and interactive revision | Completed |
-| V17 | User application, API, and local deployment | Completed locally |
+| V17 | User application, API, and local deployment | Completed locally and in Docker |
 
 See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version.
 
-V17 is verified as a local, single-user application. Its optional Docker recipe is supplied but has not yet been built or runtime-verified; public hosting is outside the implemented scope.
+V17 is verified as a local, single-user application both directly on Windows and in a Linux Docker container. Docker build, health checks, browser execution, host Ollama access, live model planning, and completed-session retention across container replacement were verified. Public hosting is outside the implemented scope.
 
 ## What Is an Agent Here?
 
@@ -76,7 +76,7 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `study_guide_v17_app.py` | Local application and asynchronous API | Serves the browser UI, queues V16 workflow operations, and persists sessions in a separate SQLite store |
 | `test_v17_app.py` | HTTP and persistence integration tests | Runs 25 tests covering review gates, revisions, retries, restart, recovery, validation, references, export, and background planning |
 | `web_v17/` | Browser interface | Contains the HTML, CSS, and JavaScript for creating sessions and reviewing plans, results, and evidence |
-| `Dockerfile.v17` and `Dockerfile.v17.dockerignore` | Optional local container recipe | Defines a non-root image and a restricted build context; container execution remains unverified |
+| `Dockerfile.v17` and `Dockerfile.v17.dockerignore` | Verified local container deployment | Defines a non-root image, health check, and build-specific ignore rules; build, runtime, Ollama access, and named-volume persistence were verified |
 | `docs/V17_GUIDE.md` | Application and API guide | Explains browser use, endpoints, persistence, recovery, verified runs, and deployment limits |
 | `V17_START_HERE.md` | Installation and validation walkthrough | Provides PowerShell setup and the offline, revision, and live-model browser checks |
 | `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V17 workflows and their actual components and routing |
@@ -523,8 +523,9 @@ runnable sessions.
 The server binds to localhost by default, checks Host/Origin values, requires a
 process-local token for writes, limits JSON body size, and serves only its explicit
 static assets. These controls support local browser use; they do not authenticate
-users or provide multi-user isolation. The optional Docker recipe and named data
-volume are documented, with container execution explicitly unverified. See
+users or provide multi-user isolation. The Docker recipe was built and run with a
+named data volume, and an approved session survived container replacement without
+changes to its snapshot or execution count. See
 [the V17 guide](docs/V17_GUIDE.md).
 
 The live browser conversion run accepted an Ollama plan on attempt 2 after an
@@ -532,6 +533,12 @@ The live browser conversion run accepted an Ollama plan on attempt 2 after an
 executed the converter once, returned `5 km = 5000 m [T1]`, and retained all three
 human approvals. Planning took 526.872 seconds, about 8 minutes 47 seconds. This
 is one verified workflow run, not a model-quality or latency benchmark.
+
+A separate Docker-hosted conversion session also accepted model attempt 2 after
+an initial parser error, used no deterministic fallback, returned `5000 m [T1]`,
+and retained all three approvals. Its planning phase took 479.237 seconds, about
+7 minutes 59 seconds. Replacing that container while keeping the named volume
+restored the exact saved snapshot with one execution and three approvals.
 
 ## Validation and Reliability
 
@@ -642,11 +649,15 @@ The following V17 evidence was verified:
 5. That live session returned `5 km = 5000 m [T1]` with one completed task, one execution, zero human revisions, three saved approvals, no pending review, and no session error.
 6. A separate service test loaded the actual two trusted documents (14 chunks), completed three tasks through all approvals, and passed reference-ID integrity checks.
 7. API tests cover stale and duplicate decisions, request-ID conflicts, restart persistence, recovery inspection without execution, corpus mismatch, input limits, local write protections, export, and connection closure.
-8. Browser screenshots verify rendering and interactions; automated browser tests were not run. The Docker image and public deployment remain unverified. All 25 V17 tests also passed on Windows in 3.849 seconds.
+8. Browser screenshots verify rendering and interactions; automated browser tests were not run. All 25 V17 tests also passed on Windows in 3.849 seconds.
+9. The Docker image built successfully in 61.9 seconds using Python 3.12-slim on Linux/amd64. The container reached healthy and served the browser application.
+10. Container-to-host Ollama access returned the installed qwen3.5:4b model. The exported container session recorded one accepted model plan on attempt 2, one parser retry, zero deterministic planning rounds, one converter execution, and all three human approvals.
+11. The original container was removed and recreated with the same study-guide-v17-data volume mounted at /data. The API comparison returned ContainerReplaced=True, Status=approved, ToolExecutions=1, Approvals=3, and SnapshotUnchanged=True.
+12. The Docker runtime check verifies a completed session surviving replacement; it does not establish crash-time exactly-once execution or a manually resumed pending gate inside Docker. Public deployment, LAN isolation, and automated container browser tests were not verified. Build-specific ignore enforcement on the older tested builder was not separately established.
 
 ## Observed Local Timings
 
-Performance varies with hardware, prompt length, output length, and Ollama scheduling. Runtime measurements were recorded on the Windows laptop; V17 test timings below came from the separate authoring environment and are not directly comparable.
+Performance varies with hardware, prompt length, output length, and Ollama scheduling. Runtime measurements were recorded on the Windows laptop, including its Linux Docker engine. Test rows identify the environment used; authoring and Windows measurements are not directly comparable.
 
 | Version | Observed workflow time |
 |---|---:|
@@ -676,9 +687,12 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 | V15: Fixed offline cases | About 0.196 to 0.711 milliseconds per case in the recorded run |
 | V16: Human-review tests | About 0.906 seconds for 32 tests on Windows |
 | V16: Review and model-mode sessions | Completed; total time including human review was not recorded |
-| V17: Live converter planning | 526.872 seconds, about 8 minutes 47 seconds, including one model retry |
-| V17: Converter execution phase | About 6.273 milliseconds for the observed specialist phase; not a per-tool benchmark |
-| V17: API integration tests | 25 tests in about 1.733 seconds in the authoring environment |
+| V17: Direct Windows live converter planning | 526.872 seconds, about 8 minutes 47 seconds, including one model retry |
+| V17: Direct Windows converter execution phase | About 6.273 milliseconds for the observed specialist phase; not a per-tool benchmark |
+| V17: API integration tests | 25 tests in 3.849 seconds on Windows; about 1.733 seconds in the authoring environment |
+| V17: Docker image build | About 61.9 seconds in the recorded first build |
+| V17: Docker-hosted live converter planning | 479.237 seconds, about 7 minutes 59 seconds, including one model retry |
+| V17: Docker-hosted converter execution phase | About 6.726 milliseconds for the observed specialist phase; not a per-tool benchmark |
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
@@ -713,6 +727,7 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - A responsive web API can queue slow model work while preserving explicit human execution gates.
 - Model mode alone does not prove model-plan acceptance; inspect retry and fallback events.
 - A process-local browser write token is not user authentication or multi-user isolation.
+- A named volume must be tested across container replacement, not inferred from its mount configuration alone.
 - Local LLM output should still be checked for factual accuracy.
 
 ## Project Origin and Extension History
@@ -730,7 +745,7 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 |---|---|---|
 | Tutorial baseline | V1-V2 | Implementations based on the freeCodeCamp tutorial |
 | Extended learning project | V3-V16 | New implementations developed for this repository |
-| Application delivery | V17 | Local browser UI, asynchronous JSON API, persisted review sessions, and an optional unverified Docker recipe |
+| Application delivery | V17 | Local browser UI, asynchronous JSON API, persisted review sessions, and verified local Docker deployment |
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 

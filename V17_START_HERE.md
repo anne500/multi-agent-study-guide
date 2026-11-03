@@ -2,6 +2,8 @@
 
 Install this bundle into the existing V16 repository. Earlier version files and the existing virtual environment are required. V17 uses the same requirements.txt; no new package is needed.
 
+For a current repository checkout that already contains V17, use the tracked source and current docs/V17_GUIDE.md. The original starter ZIP is an earlier source handoff; keep the repository's newer documentation when following the historical installation steps below.
+
 ## Install on Windows
 
 Download V17_REVIEW_STUDIO_STARTER.zip, then run these commands from the repository:
@@ -64,4 +66,6 @@ Ctrl+C stops the server. Restarting it and selecting a saved review session shou
 
 V17 data stays in v17_data/sessions.sqlite. Do not commit v17_data or session exports containing personal content. Do not delete the directory to stop the server.
 
-The guide in docs/V17_GUIDE.md records the verified Windows offline, revision, and live Ollama browser results. The live conversion accepted model attempt 2 after an initial parser error, used no deterministic fallback, and reached approved with one execution and all three approvals. Planning took about 8 minutes 47 seconds. Docker execution remains unverified. README and ARCHITECTURE describe completion of the local application within that scope.
+The guide in docs/V17_GUIDE.md records verified Windows and Docker results. The direct Windows conversion accepted model attempt 2 after an initial parser error, used no deterministic fallback, and reached approved with one execution and all three approvals. Planning took about 8 minutes 47 seconds. The Docker-hosted conversion also accepted attempt 2 with no fallback, with planning taking about 7 minutes 59 seconds.
+
+Docker build, healthy startup, offline browser execution, host Ollama access, live model planning, and retention of an unchanged approved-session snapshot across container replacement are verified. The image built in about 61.9 seconds. The named volume is study-guide-v17-data, mounted at /data. See the current guide for build/run commands and the before/after comparison. Public deployment, LAN isolation, and manual pending-gate resume inside Docker were not verified.
