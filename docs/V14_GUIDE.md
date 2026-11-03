@@ -160,4 +160,4 @@ running or staging publication files. This covers SQLite sidecar files as well.
 - The offline division-by-zero check stopped as `incomplete` with two executions and one replan.
 - The SQLite closure regression fixes the Windows temporary-file cleanup failure. Both reading and writing connections close even on early returns and errors.
 
-The README and architecture guide reflect these verified results. V15-V17 remain planned.
+The README and architecture guide reflect these verified results. V15-V17 are now implemented and included in the published v17.0.0 baseline. See [project status](PROJECT_STATUS.md) for the final cross-platform CI and Docker evidence.

@@ -2,7 +2,7 @@
 
 This guide shows how the multi-agent study guide evolves from a simple Python pipeline into a complete application architecture. Each diagram uses the actual project components and routing behavior.
 
-- V1-V17 are implemented.
+- V1-V17 are implemented and published in [v17.0.0](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0).
 - V17 is verified for local browser and API use, including Linux Docker deployment with host Ollama and named-volume retention across container replacement. Public hosting is outside the implemented scope.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
@@ -497,7 +497,13 @@ the specialist phase took 6.726 milliseconds. The container was then removed and
 recreated with the same named volume. The API comparison confirmed a different
 container ID, approved status, one execution, three approvals, and an unchanged
 saved snapshot. This demonstrates completed-session retention across replacement;
-pending-gate resume inside Docker was not manually verified by that comparison.
+pending-gate resume inside Docker was not manually verified by that comparison. Subsequent local and hosted Docker probes did verify the pending content-review snapshot across replacement, refreshed the process token, rejected stale decisions, preserved duplicate-decision state, and completed review with three executions and three approvals.
+
+## Verified delivery baseline
+
+The published `v17.0.0` tag points to commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`. CI installs the 43 pinned package versions in `requirements-v17.lock`, checks dependency consistency, and runs the eight regression scripts separately on Windows/Linux and Python 3.12/3.14. V11-V17 supply 172 unittest cases; V10 supplies an additional assertion-based script. The Docker job uses the pinned Python base digest and checks health, real HTTP API operations, trusted retrieval, export, and pending-review resume across container replacement.
+
+The [release run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) reused all five verification jobs for that exact commit, then published source, dependency pins, release evidence, and checksums. This delivery work supports the existing roadmap; it does not add another agent version. See [project status](PROJECT_STATUS.md) and the [release guide](RELEASE_GUIDE.md).
 
 ## Version relationships
 

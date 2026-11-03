@@ -1,59 +1,28 @@
-# Install and verify CI
+# Verify the completed CI baseline
 
-This package adds .github/workflows/ci.yml, scripts/ci_checks.py, scripts/docker_smoke.py, docs/CI_GUIDE.md, this guide, and a README update. It preserves V1-V17 source and tests.
+CI is installed and verified. The [v17.0.0 release run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) passed the four offline matrix jobs, Docker persistence checks, and publication at commit `34e0c40`. This guide uses the current repository; the earlier CI starter ZIP was a one-time installation handoff.
 
-From the existing repository, after downloading CI_AUTOMATION_STARTER.zip into Downloads:
-
-```powershell
-cd "$HOME\multi-agent-study-guide"
-
-Expand-Archive `
-  "$HOME\Downloads\CI_AUTOMATION_STARTER.zip" `
-  "$HOME\Downloads\CI_AUTOMATION_STARTER" `
-  -Force
-
-$ciSource = "$HOME\Downloads\CI_AUTOMATION_STARTER"
-
-New-Item -ItemType Directory -Path .\.github\workflows -Force | Out-Null
-New-Item -ItemType Directory -Path .\scripts -Force | Out-Null
-
-Copy-Item "$ciSource\.github\workflows\ci.yml" .\.github\workflows\ci.yml -Force
-Copy-Item "$ciSource\scripts\ci_checks.py" .\scripts\ci_checks.py -Force
-Copy-Item "$ciSource\scripts\docker_smoke.py" .\scripts\docker_smoke.py -Force
-Copy-Item "$ciSource\docs\CI_GUIDE.md" .\docs\CI_GUIDE.md -Force
-Copy-Item "$ciSource\CI_START_HERE.md" .\CI_START_HERE.md -Force
-Copy-Item "$ciSource\README.md" .\README.md -Force
-
-.\.venv\Scripts\python.exe scripts/ci_checks.py
-```
-
-Expected: compilation succeeds, then all eight regression scripts pass. The V10 script uses assertions and the seven later scripts contain 172 unittest cases in total. No Ollama inference is required.
-
-With Docker Desktop running and port 8001 free, use the existing verified image to exercise the new probe:
+From the repository, install the exact package baseline and run the checks:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/docker_smoke.py --image study-guide:v17 --port 8001
+python -m venv .venv-release
+.\.venv-release\Scripts\python.exe -m pip install -r requirements-v17.lock
+if ($LASTEXITCODE -ne 0) { throw "Dependency installation failed" }
+.\.venv-release\Scripts\python.exe -m pip check
+if ($LASTEXITCODE -ne 0) { throw "Dependency consistency check failed" }
+.\.venv-release\Scripts\python.exe scripts/ci_checks.py
 ```
 
-This creates and removes its own fixture resources; it does not replace the main application container or remove its volume. Expected: approved status, three tool executions, three approvals, zero model attempts, and unchanged pending state across replacement. Share errors if either local check fails.
+Expected: 27 Python files compile and all eight regression scripts pass. V11-V17 contain 172 unittest cases; V10 has an additional assertion-based script. No live Ollama service is required.
 
-Check the six intended files before staging:
+With Docker Desktop running, rebuild from the tracked Dockerfile and use a free port:
 
 ```powershell
-git --no-pager diff --check
-git status --short
-git add -- .github/workflows/ci.yml scripts/ci_checks.py scripts/docker_smoke.py docs/CI_GUIDE.md CI_START_HERE.md README.md
-git --no-pager diff --cached --check
-git --no-pager diff --cached --stat
+docker build -f Dockerfile.v17 -t study-guide:v17-baseline .
+if ($LASTEXITCODE -ne 0) { throw "Image build failed" }
+.\.venv-release\Scripts\python.exe scripts/docker_smoke.py --image study-guide:v17-baseline --port 8001
 ```
 
-Commit and push after those checks pass:
+The probe creates and removes its own fixture container and volume. Expected output is approved status, three executions, three approvals, zero model attempts, unchanged pending state across replacement, stale-decision rejection, duplicate-decision preservation, a new container ID, a retained volume, and healthy status.
 
-```powershell
-git commit -m "Add offline CI matrix and Docker review persistence checks"
-if ($LASTEXITCODE -eq 0) {
-    git push origin main
-}
-```
-
-Open https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml. Confirm four offline matrix jobs and the dependent Docker job pass. Send the run link or the first failing step's log so the actual hosted result can be verified. A green hosted run is required before recording CI as verified or creating the baseline release.
+Regular CI runs on pushes to main and pull requests targeting main; it can also be dispatched or called by another workflow. See [CI details](docs/CI_GUIDE.md) for the supported matrix, diagnostics, and limits, and [project status](docs/PROJECT_STATUS.md) for the completed release evidence. The fixed-version release workflow has already published v17.0.0 and does not need to be run again.

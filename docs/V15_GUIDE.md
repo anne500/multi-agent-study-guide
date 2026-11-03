@@ -149,10 +149,6 @@ integrity passed. The researcher returned one Common forms of energy passage.
 Semantic entailment was not evaluated, and full conservation-of-energy coverage
 was not established by that passage.
 
-All 27 development tests passed, including both actual LangGraph tests. Run the
-tests in the laptop virtual environment for final Windows confirmation. Inspect
-the saved live trace with the command printed by the program; no second live
-model run is needed for that inspection.
+All 27 V15 tests passed, including both actual LangGraph tests. The final release CI also passed this suite on Windows and Linux with Python 3.12 and 3.14. Inspect the saved live trace with the command printed by the program; no second live model run is needed for that inspection.
 
-The README and architecture updates reflect the verified runtime evidence. V16
-and V17 remain planned. V15 introduces no additional dependency requirement.
+The README and architecture updates reflect the verified runtime evidence. V16 and V17 are now implemented and included in v17.0.0. V15 introduces no additional dependency requirement. See [project status](PROJECT_STATUS.md) for the completed release and verification scope.

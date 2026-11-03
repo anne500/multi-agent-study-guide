@@ -4,7 +4,15 @@ V17 adds Review Studio, a browser interface and asynchronous JSON API around the
 
 ## Run
 
-From the repository with its existing requirements installed:
+Use a current checkout or the published source archive. Install the release baseline into the virtual environment before the first run:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-v17.lock
+.\.venv\Scripts\python.exe -m pip check
+```
+
+Then run the V17 tests and application:
 
 ```powershell
 .\.venv\Scripts\python.exe .\test_v17_app.py
@@ -82,7 +90,7 @@ Stop the service before copying the entire data directory for backup. Preserve t
 
 ## Verified local Docker deployment
 
-The recipe was built and runtime-verified on the Windows laptop using Docker Desktop 4.17.0 and Docker Engine 20.10.23 with Linux/amd64 containers. The build completed in about 61.9 seconds. This records the environment used; it is not a recommendation to retain that older Docker release. The authoring environment did not run Docker.
+The original recipe was built and runtime-verified on the Windows laptop using Docker Desktop 4.17.0 and Docker Engine 20.10.23 with Linux/amd64 containers. That first build completed in about 61.9 seconds. The later release baseline pins both the Python image digest and 43 package versions; it rebuilt successfully on the laptop in 24.4 seconds and passed the container persistence smoke test. It also passed the hosted release verification. These timings record different individual builds, not comparable performance benchmarks. The recorded older engine is not a recommendation to retain that release. The authoring environment did not run Docker.
 
 Start Docker Desktop and confirm docker version shows both Client and Server. Use Linux containers. Stop the direct Python web server before using the same host port. From the existing repository:
 
@@ -160,7 +168,7 @@ $v17NewContainer = docker inspect --format '{{.Id}}' study-guide-v17
 
 The recorded result was ContainerReplaced=True, Status=approved, ToolExecutions=1, Approvals=3, and SnapshotUnchanged=True. The container ID changed from 4cf9517d8efe to 102d7f87fd78 while the same study-guide-v17-data volume remained mounted at /data. Reload the browser after replacement to obtain a new write token.
 
-This proves retention of the completed session across removal and recreation. It does not prove manually resumed pending-gate behavior inside Docker or recovery after interruption midway through a tool. Automated API tests cover gate resume and service restart separately. Removing the named volume would remove that persisted history; retain it when replacing the container.
+This proves retention of the completed session across removal and recreation. It does not prove manually resumed pending-gate behavior inside Docker or recovery after interruption midway through a tool. Automated API tests cover gate resume and service restart separately. The later Docker smoke test also verifies pending-gate resume across actual container replacement, as described below. Removing the named volume would remove that persisted history; retain it when replacing the container.
 
 References for the recipe:
 
@@ -190,3 +198,11 @@ All 25 V17 tests passed on Windows in 3.849 seconds. Those are host-run tests; t
 The Docker-hosted model session `382dd7d5a50b4b2094aab903dacc7664` accepted model attempt 2 after an OutputParserException on attempt 1. It recorded zero deterministic planning rounds and returned `5 km = 5000 m [T1]` with one execution, revision 0, all three approvals, approved status, and no pending review. Planning took 479237.247 ms, about 7 minutes 59 seconds; the specialist phase took 6.726 ms. These phase timings exclude human review and are not representative performance benchmarks.
 
 The completed-session snapshot was unchanged after container replacement. Pending-gate resume inside Docker, arbitrary crash recovery, LAN isolation, build-specific ignore enforcement on the older builder, and public deployment were not established by this manual test. The local application and functional local Docker deployment are verified within that scope.
+
+## Final CI and release evidence
+
+The pinned baseline passed all eight offline regression scripts on the Windows laptop in 33.13 seconds. Its Docker build took 24.4 seconds. The actual probe reached approved with three executions, zero model attempts, three approvals, an unchanged pending snapshot, stale-decision rejection, duplicate-decision preservation, a changed container ID, a retained volume, and healthy status.
+
+The [Release V17 workflow](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) passed four Windows/Linux and Python 3.12/3.14 regression jobs, the Docker integration job, and publication at commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`. The [v17.0.0 release](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0) contains source, dependency pins, release evidence, and SHA-256 checksums. All three asset checksum checks passed during assembly. See [project status](PROJECT_STATUS.md) for the completed scope.
+
+These automated Docker results supplement the earlier manual completed-session comparison. Crash-time exactly-once execution, live model quality, public multi-user hosting, LAN isolation, and browser automation are outside the verified scope.

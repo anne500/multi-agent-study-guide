@@ -1,42 +1,18 @@
-# Install the V17 release candidate
+# V17.0.0 release: start here
 
-This update is based on main commit 01c1b245549d09c24c82de5ccda1283cf8ec8316. It changes CI and Docker installation to the tested 43-package baseline, adds a manual CI-gated release workflow, and records the verified hosted results. Application code and tests are preserved.
+[V17.0.0 is published](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0). Its [release run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) passed all five verification jobs and publication. The tag identifies tested commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`.
 
-## Apply the update
+The original release-candidate ZIP was a one-time handoff. Use the current repository for updated documentation or the release source archive for the fixed code baseline. The release workflow is complete; do not dispatch it again for the existing tag.
 
-Download V17_RELEASE_BASELINE.zip into Downloads, then run from the existing repository:
+## Download and run
+
+On the release page, download multi-agent-study-guide-v17.0.0.zip and SHA256SUMS.txt. Compare the ZIP hash with its entry in the checksum file:
 
 ```powershell
-cd "$HOME\multi-agent-study-guide"
-if ((git status --porcelain)) { throw "Review or commit existing changes before applying the update" }
-if ((git rev-parse HEAD) -ne "01c1b245549d09c24c82de5ccda1283cf8ec8316") {
-    throw "Repository head differs from the package baseline. Share git log -1 before replacing files."
-}
-
-Expand-Archive "$HOME\Downloads\V17_RELEASE_BASELINE.zip" "$HOME\Downloads\V17_RELEASE_BASELINE" -Force
-$releaseSource = "$HOME\Downloads\V17_RELEASE_BASELINE"
-Copy-Item "$releaseSource\*" . -Recurse -Force
+Get-FileHash "$HOME\Downloads\multi-agent-study-guide-v17.0.0.zip" -Algorithm SHA256
 ```
 
-The archive contains these eleven files only:
-
-```text
-.github/workflows/ci.yml
-.github/workflows/release-v17.yml
-.gitignore
-Dockerfile.v17
-Dockerfile.v17.dockerignore
-README.md
-RELEASE_START_HERE.md
-requirements-v17.lock
-docs/CI_GUIDE.md
-docs/RELEASE_GUIDE.md
-docs/releases/v17.0.0.md
-```
-
-## Verify locally
-
-Use a fresh environment. No Ollama model run is needed for these checks:
+Extract the archive and enter its multi-agent-study-guide-v17.0.0 directory. From that directory, or from an existing current checkout:
 
 ```powershell
 python -m venv .venv-release
@@ -46,28 +22,25 @@ if ($LASTEXITCODE -ne 0) { throw "Dependency installation failed" }
 if ($LASTEXITCODE -ne 0) { throw "Dependency consistency check failed" }
 .\.venv-release\Scripts\python.exe scripts/ci_checks.py
 if ($LASTEXITCODE -ne 0) { throw "Offline regressions failed" }
-
-docker build -f Dockerfile.v17 -t study-guide:v17-baseline .
-if ($LASTEXITCODE -ne 0) { throw "Docker build failed" }
-.\.venv-release\Scripts\python.exe scripts/docker_smoke.py --image study-guide:v17-baseline --port 8001
-if ($LASTEXITCODE -ne 0) { throw "Docker verification failed" }
+.\.venv-release\Scripts\python.exe study_guide_v17_app.py
 ```
 
-Expect eight passing scripts, 172 unittest cases plus V10 assertions, and a Docker JSON summary with approved status, three executions, three approvals, zero model attempts, and unchanged pending state after container replacement.
+Open http://127.0.0.1:8000. Leave Offline planning selected for a run without model inference. See [V17 start](V17_START_HERE.md) for the browser walkthrough and Ollama configuration.
 
-## Commit and push
+## Release assets
+
+| Asset | Purpose |
+| --- | --- |
+| multi-agent-study-guide-v17.0.0.zip | Tracked source, tests, and documentation at the release commit |
+| requirements-v17.lock | 43 exact package versions; also included in the ZIP, alongside requirements.txt |
+| release-evidence.json | Exact commit, verification workflow URL, and scope |
+| SHA256SUMS.txt | Checksums for the source ZIP, lock file, and evidence file |
+
+To fetch the release tag into an existing clone:
 
 ```powershell
-git --no-pager diff --check
-git status --short
-git add -- .github/workflows/ci.yml .github/workflows/release-v17.yml .gitignore Dockerfile.v17 Dockerfile.v17.dockerignore README.md RELEASE_START_HERE.md requirements-v17.lock docs/CI_GUIDE.md docs/RELEASE_GUIDE.md docs/releases/v17.0.0.md
-git --no-pager diff --cached --check
-if ($LASTEXITCODE -ne 0) { throw "Staged whitespace check failed" }
-git --no-pager diff --cached --stat
-git commit -m "Pin V17 release baseline and add verified release workflow"
-if ($LASTEXITCODE -eq 0) { git push origin main }
+git fetch origin --tags
+git show --no-patch --oneline v17.0.0
 ```
 
-Open the [CI workflow](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml) and confirm the new commit is green. Then open [Release V17](https://github.com/anne500/multi-agent-study-guide/actions/workflows/release-v17.yml), choose main, and select Run workflow. That manual action reruns all five CI jobs and publishes v17.0.0 only after they pass for that exact commit.
-
-The release workflow never moves an existing tag. If it fails after creating the tag, share the failure before retrying. See docs/RELEASE_GUIDE.md for evidence, assets, maintenance policy, and limits. Do not claim the release is published until the release page and its linked verification run are confirmed.
+No additional commit, tag, or publication action is required to complete V1-V17. For Docker verification use [CI start](CI_START_HERE.md). See [project status](docs/PROJECT_STATUS.md) for completion evidence and [release maintenance](docs/RELEASE_GUIDE.md) for baseline updates and publication history. Documentation on main can be updated after release; the tag and its assets remain the recorded code snapshot.

@@ -205,4 +205,4 @@ https://docs.langchain.com/oss/python/langgraph/interrupts
   deterministic fallback. Inspect the saved checkpoint's `events` to establish
   the actual planning path; tests cover model-call preservation across resume.
 
-The main README and architecture guide reflect these observations. V17 remains planned.
+The main README and architecture guide reflect these observations. V17 is now implemented and published as part of v17.0.0, with the browser/API layer, Docker persistence checks, and CI. See [project status](PROJECT_STATUS.md).

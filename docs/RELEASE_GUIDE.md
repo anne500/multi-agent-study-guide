@@ -1,6 +1,6 @@
 # V17 dependency baseline and release
 
-The release candidate keeps the V1-V17 roadmap and application behavior. It adds a tested package baseline and an explicit, manual way to publish v17.0.0 with source, checksums, and verification evidence. No release is published by committing these files.
+[V17.0.0 is published](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0) at commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`. The [successful release workflow](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) ran the four offline matrix jobs and Docker checks before publication. Source, dependency pins, release evidence, and checksums are attached. The V1-V17 roadmap and application behavior are complete for the documented local, single-user scope. See [project status](PROJECT_STATUS.md).
 
 ## Baseline
 
@@ -44,9 +44,11 @@ if ($LASTEXITCODE -ne 0) { throw "Image build failed" }
 
 The smoke test uses its own fixture container and volume. The regular study-guide-v17 container and its data volume are separate. The hosted workflow repeats these checks across the supported matrix and Docker.
 
-## Publish v17.0.0
+## Completed publication procedure
 
-After committing the candidate to main and checking its CI run:
+The following procedure records how v17.0.0 was published. It is complete; do not dispatch the version-specific workflow again for the existing tag. A future release needs its own version, notes, and verified commit.
+
+For the original publication:
 
 1. Open [Release V17](https://github.com/anne500/multi-agent-study-guide/actions/workflows/release-v17.yml).
 2. Select Run workflow, choose main, and start it. This is the explicit publication action.
@@ -70,6 +72,6 @@ For a later dependency refresh, start from the supported ranges in requirements.
 
 ## Evidence status
 
-Verified before this candidate: the original matrix passed all five jobs, and both local and hosted Docker probes confirmed pending review retention across replacement. The candidate changes installation inputs, CI reuse, and release publication. A fresh Linux CPython 3.12.14 environment installed exactly the 43 pinned packages with no unrelated extras, and pip check passed. All eight regression scripts passed in 6.38 seconds, including 172 unittest cases plus the V10 assertions. Local checks also passed for workflow structure, Bash syntax, source ZIP assembly, and asset checksums. The offline run removed ambient proxy settings because no external service is used; no optional proxy package was added to the project baseline. Hosted verification of these new files and actual tag/publication remain pending until they are pushed and the manual release workflow runs. The workflow does not evaluate live model quality or browser interaction.
+The original matrix passed all five jobs, and both local and hosted Docker probes confirmed pending review retention across replacement. The released baseline pins installation inputs and includes CI reuse and release publication. A fresh Linux CPython 3.12.14 environment installed exactly the 43 pinned packages with no unrelated extras, and pip check passed. All eight regression scripts passed in 6.38 seconds, including 172 unittest cases plus the V10 assertions. Local checks also passed for workflow structure, Bash syntax, source ZIP assembly, and asset checksums. The offline run removed ambient proxy settings because no external service is used; no optional proxy package was added to the project baseline. The Windows laptop subsequently passed all eight scripts in 33.13 seconds, rebuilt the pinned image in 24.4 seconds, and passed the actual Docker smoke test. [Pinned-baseline CI](https://github.com/anne500/multi-agent-study-guide/actions/runs/41601567884) passed at `7d3e75c`. A release-workflow context error was corrected in `34e0c40`: runner.temp moved from job-level env to the two step environments. [CI for that correction](https://github.com/anne500/multi-agent-study-guide/actions/runs/41602659785) passed, and the [manual release run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) repeated all five checks and successfully published v17.0.0. The source, lock, and evidence checksum checks passed. Documentation on main can receive later corrections without moving the published tag or replacing its assets. The workflow does not evaluate live model quality or browser interaction.
 
 References: [reusable workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows), [workflow permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions), and [GitHub CLI release creation](https://cli.github.com/manual/gh_release_create).

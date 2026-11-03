@@ -34,7 +34,7 @@ See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflo
 
 V17 is verified as a local, single-user application both directly on Windows and in a Linux Docker container. Docker build, health checks, browser execution, host Ollama access, live model planning, and completed-session retention across container replacement were verified. Public hosting is outside the implemented scope.
 
-The [verified CI run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41578448362) passed on Windows and Linux with Python 3.12 and 3.14, including Docker pending-review persistence. The V17 release candidate uses [requirements-v17.lock](requirements-v17.lock) for exact package versions and a fixed Docker base digest. See the [release guide](docs/RELEASE_GUIDE.md) for the manual, CI-gated v17.0.0 publication workflow and its verification limits.
+**V1-V17 are complete for the documented local, single-user learning scope.** [V17.0.0 is published](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0) at commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`. Its [release workflow](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) passed all four Windows/Linux and Python 3.12/3.14 test jobs, the Docker persistence job, and publication. The release includes source, the 43-package baseline, verification evidence, and SHA-256 checksums. See the [completion record](docs/PROJECT_STATUS.md) for evidence and remaining limitations, and the [release guide](docs/RELEASE_GUIDE.md) for installation and maintenance.
 
 ## What Is an Agent Here?
 
@@ -90,7 +90,8 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `docs/CI_GUIDE.md` | CI scope and reproduction | Explains triggers, jobs, local commands, diagnostics, and verification limits |
 | `requirements-v17.lock` | Tested dependency baseline | Pins 43 package versions captured from all four passing CI environments |
 | `.github/workflows/release-v17.yml` | Manual release publication | Reuses all five CI jobs, then creates v17.0.0 and publishes source, checksums, and verification evidence |
-| `docs/RELEASE_GUIDE.md` | Baseline and release procedure | Documents platform evidence, publication steps, recovery, and maintenance |
+| `docs/RELEASE_GUIDE.md` | Baseline and release procedure | Documents platform evidence, publication history, recovery, and maintenance |
+| `docs/PROJECT_STATUS.md` | Completion and evidence | Records the published baseline, verified scope, known limits, and separate ReleaseTruth fixture issue |
 
 ## Requirements
 
@@ -102,7 +103,7 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 - `langgraph-checkpoint-sqlite`
 - `pydantic`
 
-Developed and tested on Windows with Python 3.14.
+Developed and tested on Windows with Python 3.14. CI also verifies CPython 3.12 and 3.14 on Windows and Linux x86-64.
 
 ## Installation
 
@@ -256,10 +257,14 @@ is not used by this check.
 Run the offline checks locally with `python scripts/ci_checks.py`. Run the Docker
 probe beside the normal app with `python scripts/docker_smoke.py --image
 study-guide:v17 --port 8001` after building that image. See
-[the CI guide](docs/CI_GUIDE.md) for commands and limits. The first hosted run
-passed all five jobs; the pinned baseline must pass a new run after it is pushed.
-The separate manual Release V17 workflow reuses the full CI suite for its exact
-commit before publishing the tag and source assets. The V1-V17 roadmap is preserved.
+[the CI guide](docs/CI_GUIDE.md) for commands and limits. The pinned baseline passed
+[CI](https://github.com/anne500/multi-agent-study-guide/actions/runs/41601567884),
+and the corrected release workflow passed
+[CI](https://github.com/anne500/multi-agent-study-guide/actions/runs/41602659785).
+The manual [Release V17 run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282)
+then repeated all five checks for commit `34e0c40` and published `v17.0.0`.
+The V1-V17 roadmap is preserved. The version-specific release workflow has finished
+its purpose; do not dispatch it again for the existing tag.
 
 ## Workflow Architecture
 
