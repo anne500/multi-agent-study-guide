@@ -1,5 +1,7 @@
 # Multi-Agent Study Guide with Python, LangGraph, Ollama, and Qwen
 
+[![CI](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml/badge.svg)](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml)
+
 A versioned learning project that builds local multi-agent study-guide workflows with Python, LangGraph, Ollama, and the `qwen3.5:4b` model.
 
 The repository starts with a simple sequential pipeline and progressively adds graph orchestration, parallel workers, routing, human approval, automated review, structured outputs, safe fallback behavior, persistent checkpoint recovery, cross-session learner memory, trusted retrieval with verified citations, controlled tool use, dynamic planning, observability, durable review, and a local browser application with a JSON API.
@@ -80,6 +82,10 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `docs/V17_GUIDE.md` | Application and API guide | Explains browser use, endpoints, persistence, recovery, verified runs, and deployment limits |
 | `V17_START_HERE.md` | Installation and validation walkthrough | Provides PowerShell setup and the offline, revision, and live-model browser checks |
 | `docs/ARCHITECTURE.md` | Architecture reference | Shows implemented V1-V17 workflows and their actual components and routing |
+| `.github/workflows/ci.yml` | Continuous integration | Runs Python 3.12/3.14 offline tests on Windows and Linux, then a Linux Docker smoke test |
+| `scripts/ci_checks.py` | Portable verification runner | Compiles project Python files and runs each root regression script in a separate process |
+| `scripts/docker_smoke.py` | Container integration check | Uses temporary test resources to verify readiness, trusted retrieval, API gates, export, and pending-review resume across replacement |
+| `docs/CI_GUIDE.md` | CI scope and reproduction | Explains triggers, jobs, local commands, diagnostics, and verification limits |
 
 ## Requirements
 
@@ -222,6 +228,32 @@ Open http://127.0.0.1:8000 and keep the terminal running. Offline planning is
 selected by default. Uncheck it before creating a session to use Ollama. Review
 and approve the plan, content, and final evidence questions. The existing
 requirements are sufficient; V17 adds no package or frontend-build dependency.
+
+## Continuous Integration
+
+The CI workflow runs on pushes to main, pull requests targeting main, and manual
+dispatch. Four jobs cover Python 3.12 and 3.14 on Ubuntu 24.04 and Windows 2025.
+Each compiles the project and runs all root test_v*.py scripts in independent
+processes, including V10's assertion-based fallback check. No Ollama model or
+API key is required for these checks. Dependencies are installed from the
+existing requirements.txt and the resolved package versions are recorded in logs.
+
+After those jobs pass, a Linux job builds Dockerfile.v17 and checks the API
+through a fixture container and named volume. It verifies that tools wait for
+plan approval, trusted retrieval and arithmetic/conversion results are available,
+duplicate approval retries preserve state, and a pending content-review snapshot
+survives container replacement. It resumes the saved gate, rejects a stale
+decision, completes final approval, and checks JSON export without repeating tools.
+The fixture cleans up its own container and volume; the user's application data
+is not used by this check.
+
+Run the offline checks locally with `python scripts/ci_checks.py`. Run the Docker
+probe beside the normal app with `python scripts/docker_smoke.py --image
+study-guide:v17 --port 8001` after building that image. See
+[the CI guide](docs/CI_GUIDE.md) for commands and limits. Local validation does
+not establish that the hosted workflow is green; confirm the first run on
+[GitHub Actions](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml)
+after committing these files. The V1-V17 roadmap is preserved.
 
 ## Workflow Architecture
 
