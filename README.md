@@ -30,7 +30,7 @@ All LLM calls run locally through Ollama. No paid API key is required.
 | V16 | Multi-stage human approval and interactive revision | Completed |
 | V17 | User application, API, and local deployment | Completed locally and in Docker |
 
-See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version.
+See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version. The [final source and diagram audit](docs/FINAL_AUDIT.md) records all 17 source comparisons, 23 successful diagram renders, and browser workflow checks.
 
 V17 is verified as a local, single-user application both directly on Windows and in a Linux Docker container. Docker build, health checks, browser execution, host Ollama access, live model planning, and completed-session retention across container replacement were verified. Public hosting is outside the implemented scope.
 
@@ -323,9 +323,9 @@ V9 also includes:
 - Deterministic fallback assignments when orchestration output is unsuitable
 - One retry after malformed or empty reviewer output
 - A maximum of two quiz revisions
-- Safe quiz preservation when structured review cannot be parsed
-- Explicit `fallback_approved` routing to prevent an unnecessary revision loop
-- Protection against blank quiz-reviser output
+- A failed reviewer parse requests revision and stops safely at the revision cap
+
+V10 adds quiz preservation, `fallback_approved` routing after reviewer parsing failure, and protection against blank quiz-reviser output. Those improvements are in the V10 implementation reused by V11/V12; they are not retroactively implemented in the separate V9 file.
 
 ## V10: Persistent Checkpointing and Recovery
 

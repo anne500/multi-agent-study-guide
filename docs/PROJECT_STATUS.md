@@ -2,6 +2,8 @@
 
 Status as of November 3, 2026: V1-V17 are implemented and the documented local, single-user learning project is complete. [V17.0.0 is published](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0) at commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`. The [release run](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) passed all five verification jobs and publication. No additional implementation or release step remains for the agreed V1-V17 scope.
 
+The [final source and architecture audit](FINAL_AUDIT.md) additionally compared all 17 implementations with their diagrams, rendered all 23 Mermaid blocks, reran the full offline suite, and exercised actual browser approval/revision/rejection flows. It corrected several documentation details and SQLite sidecar ignore patterns.
+
 ## Completion record
 
 | Area | Verified result | Evidence |
@@ -38,7 +40,7 @@ The published tag and assets capture the tested code and its documentation at re
 These items define the boundary of this completed learning project. They are not unfinished V1-V17 requirements:
 
 - Public multi-user hosting, user authentication, and production availability operations.
-- Automated browser interaction, broad live-model evaluation, semantic entailment, and measured learner outcomes.
+- A maintained browser regression job in CI, broad live-model evaluation, semantic entailment, and measured learner outcomes. Audit-time browser interaction checks are recorded separately in FINAL_AUDIT.md.
 - Crash-time exactly-once tool execution, tamper-proof audits, and import/migration of exported sessions.
 - Bit-for-bit reproducible builds, package hashes, signed attestations, and automatic dependency/base-image updates. The current baseline pins versions and a Docker digest and requires maintenance.
 - LAN isolation or build-specific ignore enforcement on the older recorded local Docker engine. Functional Docker verification is not evidence for those separate properties.

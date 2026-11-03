@@ -1,7 +1,7 @@
 # V14: Dynamic Planning and Agent Selection
 
 Status: implemented and validated on Windows with the actual trusted corpus.
-Publication follows the final repository audit.
+V14 is included in the published v17.0.0 baseline.
 
 V14 adds a validated plan, selective specialist execution, progress evaluation,
 and one bounded replanning round. Earlier version files are reused as imports.

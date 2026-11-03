@@ -4,6 +4,8 @@ This guide shows how the multi-agent study guide evolves from a simple Python pi
 
 - V1-V17 are implemented and published in [v17.0.0](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0).
 - V17 is verified for local browser and API use, including Linux Docker deployment with host Ollama and named-volume retention across container replacement. Public hosting is outside the implemented scope.
+- Every version has a diagram below. Diagrams describe application flow; internal helpers and exception handling are expanded in the text where needed.
+- The [final architecture audit](FINAL_AUDIT.md) records source comparisons and diagram rendering checks.
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
@@ -54,7 +56,7 @@ flowchart LR
 V3 adds a simplifier between teaching and quiz generation so the quiz is based on the clearer notes.
 
 ```mermaid
-flowchart LR
+flowchart TD
     A([START]) --> B[Planner]
     B --> C[Teacher]
     C --> D[Simplifier]
@@ -164,26 +166,31 @@ flowchart TD
     G -->|Approved| H([END])
     G -->|Revision required| I[Quiz reviser]
     I --> G
-    G -->|Retry or fallback| H
+    G -->|Two-revision limit reached| H
 ```
 
-### V9 reliability controls
+### V9 reviewer retry and fallback
 
 ```mermaid
-flowchart LR
-    A[Model response] --> B{Schema valid?}
-    B -->|Yes| C[Use structured result]
-    B -->|No| D[Retry once]
+flowchart TD
+    A[Reviewer response] --> B{Schema valid?}
+    B -->|Yes| C[Use approved or revise status]
+    B -->|No| D[Retry reviewer once]
     D --> E{Retry valid?}
     E -->|Yes| C
-    E -->|No| F[Safe fallback]
+    E -->|No| F[Request quiz revision]
+    F --> G{Two revisions already used?}
+    G -->|No| H[Revise quiz and review again]
+    G -->|Yes| I[Stop at max_iterations]
 ```
+
+This retry belongs to the reviewer. V9 router parsing errors propagate; the orchestrator uses validated fallback assignments when its response fails or is unsuitable. V9 reviewer parse failure requests revision and can terminate at the revision cap. V10 separately introduces `fallback_approved` to preserve the existing nonblank quiz without another revision loop, and preserves quiz text when a reviser returns blank output.
 
 ## V10: Persistent checkpointing and recovery
 
 **Status:** Implemented
 
-V10 compiles the V9 graph with `SqliteSaver`. A thread ID connects each session to durable graph state, allowing pause, resume, completed-session loading, and recovery without repeating completed nodes.
+V10 retains the V9 graph architecture, improves reviewer fallback, and compiles its graph with `SqliteSaver`. A thread ID connects each session to durable graph state, allowing pause, resume, completed-session loading, and recovery without repeating completed nodes. Reviewer parsing failure ends with `fallback_approved`, preserving the current nonblank quiz; it does not establish a successful model review.
 
 ```mermaid
 flowchart TD
@@ -250,16 +257,15 @@ flowchart TD
     B --> D[Load trusted Markdown]
     E[(Trusted documents)] --> D
     D --> F[Chunk and lexical rank]
-    F --> G[Assign S1 through S4]
-    G --> H[Grounded parallel workers]
-    H --> I[Per-section validator]
-    I -->|Invalid| J[Retry once or trusted fallback]
-    J --> I
-    I -->|Valid| K[Quiz and structured review]
-    K --> L[Per-question citation validator]
-    L --> M[Final deterministic verifier]
-    M <--> N[(V12 checkpoint SQLite)]
-    M --> O{Approve memory save?}
+    F --> G{Matching trusted chunks?}
+    G -->|No| Q[Exit before generation]
+    G -->|Yes| H[Assign citation labels and parallel tasks]
+    H --> I[Grounded sections with one retry and source fallback]
+    I --> K[Quiz generation and bounded review loop]
+    K --> M{Final section and question citations valid?}
+    K <--> N[(V12 graph checkpoints)]
+    M -->|No| R[Report invalid output and block memory save]
+    M -->|Yes| O{Approve outcome memory save?}
     O -->|Yes| C
     O -->|No| P[Keep generated text untrusted]
 ```
@@ -279,7 +285,8 @@ flowchart TD
     A[Study question] --> B[Structured tool selector]
     B --> C{Decision}
     C -->|Final| D[Answer verifier]
-    C -->|Tool request| E[Allowlist and argument validator]
+    C -->|Tool request and budget remains| E[Allowlist and argument validator]
+    C -->|Two-call limit reached| D
     E -->|Rejected| F[Safe failure observation]
     E -->|Approved| G{Local tool}
     G --> H[Calculator]
@@ -289,15 +296,14 @@ flowchart TD
     I --> K
     J --> K
     F --> K
-    K -->|Below two-call limit| B
-    K -->|Limit reached| D
-    D --> L[Verified answer with T and S references]
+    K -->|Return after every observation| B
+    D --> L[Final answer with completed or safe_failure status]
     L <--> M[(V13 checkpoint SQLite)]
 ```
 
 The calculator parses a bounded numeric abstract syntax tree and never calls Python `eval`. The unit converter uses a fixed table for approved length, mass, and time units. Trusted search reuses V12 deterministic retrieval and citation verification. No shell, arbitrary-code, or network tool is registered.
 
-Model selection receives one structured-output retry before deterministic routing takes over. Unknown tools and invalid arguments produce structured safe failures instead of execution. The answer verifier rejects unknown `[T#]` references and any `[S#]` citation not returned by trusted search.
+Model selection receives one structured-output retry before deterministic routing takes over. Unknown tools and invalid arguments produce structured safe failures instead of execution. The answer verifier rejects unknown `[T#]` references and any `[S#]` citation not returned by trusted search. After every tool observation the graph re-enters the selector. The two-call limit prevents another tool execution; it does not skip that selector invocation. When the limit is reached, finalization uses the available validated observations if the decision still asks for a tool. A session is completed only when at least one observation succeeded; otherwise its final status is safe_failure.
 
 Thirty deterministic tests verify the registry, calculator, unit conversion, trusted search, schemas, routing, references, and failure handling without Ollama or network access. A verified end-to-end run selected the unit converter and returned `5.0 km = 5000 m [T1]`. A separate actual-corpus test returned validated V12 friction and energy evidence with `[S1]`, `[S2]`, and `[T1]`.
 
@@ -449,8 +455,10 @@ flowchart TD
     C -->|Publish gate or terminal state| H[Cached session view]
     H -->|Persist metadata| G
     G -->|Load views at startup| H
-    A -->|GET status or export| H
-    H -->|Results and review state| A
+    A -->|GET status or export| B
+    B -->|Read saved view| H
+    H -->|Saved results and review state| B
+    B -->|JSON response| A
 ```
 
 The graph reuses V14 task validation and execution, V12 trusted retrieval, V13
