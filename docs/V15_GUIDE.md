@@ -14,6 +14,8 @@ V14 source files stay unchanged. No hosted tracing service or API key is require
 
 ## Architecture
 
+Diagram colors follow the [architecture color key](ARCHITECTURE.md#diagram-color-key).
+
 ```mermaid
 flowchart TD
     A[Study goal or fixed benchmark] --> B[Observed V14 workflow]
@@ -24,6 +26,14 @@ flowchart TD
     E --> G[Local evaluation report]
     F --> G
     G --> H[(SQLite reports)]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C,D,E,F,G logic;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class H store;
 ```
 
 ## What V15 measures

@@ -9,17 +9,32 @@ This guide shows how the multi-agent study guide evolves from a simple Python pi
 - Solid arrows show the normal execution path.
 - Labeled branches show conditional routing, review decisions, or recovery behavior.
 
+## Diagram color key
+
+| Color | Read it as | Examples |
+| --- | --- | --- |
+| 🟪 Purple | Model-capable planning or generation | Planner, teacher, structured reviewer |
+| 🟦 Blue | Application logic and deterministic processing | Validators, tools, HTTP API, metrics |
+| 🟨 Amber | A control decision | Schema validity, budgets, completion |
+| 🟧 Orange | A human decision | Plan, content, and final review gates |
+| 🟩 Teal / green | Storage or an approved outcome | SQLite, trusted documents, approved session |
+| 🟥 Red | A blocked, rejected, or incomplete path | Invalid citations, rejected session |
+
+Node labels and arrows carry the meaning as well as color. Purple indicates a step that can involve model work; offline planning and deterministic fallback remain available where the implementation supports them. The roadmap graphic groups learning stages with a separate, labeled stage palette.
+
 ## Architecture evolution
+
+![Seven learning stages from V1 to V17](assets/learning-journey.svg)
 
 | Stage | Versions | Main idea |
 |---|---|---|
-| Foundations | V1-V3 | Sequential generation and clearer notes |
-| Coordination | V4-V6 | Parallel work, delegation, and routing |
-| Control | V7-V8 | Human approval and automated refinement |
-| Reliability | V9-V10 | Structured outputs, fallbacks, and persistent recovery |
-| Context | V11-V13 | Long-term memory, retrieval, and tools |
-| Adaptation | V14-V16 | Dynamic planning, evaluation, and human control |
-| Delivery | V17 | Local application, asynchronous API, persisted reviews, and verified local Docker deployment |
+| 🟦 Foundations | V1-V3 | Sequential generation and clearer notes |
+| 🟦 Coordination | V4-V6 | Parallel work, delegation, and routing |
+| 🟨 Control | V7-V8 | Human approval and automated refinement |
+| 🟥 Reliability | V9-V10 | Structured outputs, fallbacks, and persistent recovery |
+| 🟪 Context | V11-V13 | Long-term memory, retrieval, and tools |
+| 🟧 Adaptation | V14-V16 | Dynamic planning, evaluation, and human control |
+| 🟩 Delivery | V17 | Local application, asynchronous API, persisted reviews, and verified local Docker deployment |
 
 ## V1: Plain Python sequential agents
 
@@ -33,6 +48,12 @@ flowchart LR
     B -->|Outline| C[Teacher]
     C -->|Notes| D[Quiz writer]
     D --> E[Study guide]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D model;
+    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    class E success;
 ```
 
 ## V2: LangGraph sequential workflow
@@ -47,6 +68,10 @@ flowchart LR
     B --> C[Teacher node]
     C --> D[Quiz writer node]
     D --> E([END])
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D model;
 ```
 
 ## V3: Sequential simplification
@@ -62,6 +87,10 @@ flowchart TD
     C --> D[Simplifier]
     D --> E[Quiz writer]
     E --> F([END])
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D,E model;
 ```
 
 ## V4: Parallel specialist workers
@@ -79,6 +108,10 @@ flowchart TD
     C --> E
     D --> E
     E --> F([END])
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D,E model;
 ```
 
 ## V5: Orchestrator and delegated subagents
@@ -97,6 +130,12 @@ flowchart TD
     D --> F
     E --> F
     F --> G([END])
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D,E model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class F logic;
 ```
 
 ## V6: Supervisor routing
@@ -113,6 +152,10 @@ flowchart TD
     C --> E[Quiz writer]
     D --> E
     E --> F([END])
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D,E model;
 ```
 
 ## V7: Human approval loop
@@ -130,6 +173,12 @@ flowchart TD
     E --> C
     D --> F[Quiz writer]
     F --> G([END])
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,D,E,F model;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class C human;
 ```
 
 ## V8: Automated review and refinement
@@ -147,6 +196,10 @@ flowchart TD
     D -->|Revision required| F[Quiz reviser]
     F --> D
     D -->|Maximum revisions| E
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D,F model;
 ```
 
 ## V9: Structured multi-agent workflow
@@ -167,6 +220,12 @@ flowchart TD
     G -->|Revision required| I[Quiz reviser]
     I --> G
     G -->|Two-revision limit reached| H
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,C,D,F,G,I model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class E logic;
 ```
 
 ### V9 reviewer retry and fallback
@@ -182,6 +241,14 @@ flowchart TD
     F --> G{Two revisions already used?}
     G -->|No| H[Revise quiz and review again]
     G -->|Yes| I[Stop at max_iterations]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class A,D,H model;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    class B,E,G decision;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C,F logic;
 ```
 
 This retry belongs to the reviewer. V9 router parsing errors propagate; the orchestrator uses validated fallback assignments when its response fails or is unsuitable. V9 reviewer parse failure requests revision and can terminate at the revision cap. V10 separately introduces `fallback_approved` to preserve the existing nonblank quiz without another revision loop, and preserves quiz text when a reviser returns blank output.
@@ -204,6 +271,16 @@ flowchart TD
     C --> G{Pause requested?}
     G -->|Before quiz| H[Save and exit]
     G -->|No| I[Continue to completion]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    class B,G decision;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class C model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class D,E,I logic;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class F store;
 ```
 
 ### V10 workflow with persistence
@@ -218,6 +295,14 @@ flowchart LR
     B <--> F
     C <--> F
     D <--> F
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class A,B,D model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C logic;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class F store;
 ```
 
 ## V11: Cross-session learner memory
@@ -240,6 +325,16 @@ flowchart TD
     J -->|No| K[Keep generated text untrusted]
     J -->|Yes| L[Validate learner outcome]
     L --> C
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class B,D,L logic;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class E,J human;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class G model;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class C,H store;
 ```
 
 The learner-memory store contains learner level, preferences, completed topics, quiz performance, recurring mistakes, and recent progress. Generated study-guide text is not stored as trusted memory. The eight deterministic tests verify validation, persistence, deduplication, learner isolation, summaries, and safe outcome storage without calling Ollama.
@@ -268,6 +363,20 @@ flowchart TD
     M -->|Yes| O{Approve outcome memory save?}
     O -->|Yes| C
     O -->|No| P[Keep generated text untrusted]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class B,D,F logic;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class H,I,K model;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    class G,M decision;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class O human;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class C,E,N store;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class R failure;
 ```
 
 V12 validates each generated section and each quiz question independently. Every item must contain substantive text and at least one allowed citation. An invalid worker response receives one corrective retry. If the retry remains blank, insubstantial, or uncited, the workflow uses deterministic text derived from the retrieved trusted source. Missing or unknown citation IDs block final validation and prevent trusted-memory storage.
@@ -299,6 +408,18 @@ flowchart TD
     K -->|Return after every observation| B
     D --> L[Final answer with completed or safe_failure status]
     L <--> M[(V13 checkpoint SQLite)]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B model;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    class C,G decision;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class D,E,H,I,J,K logic;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class F failure;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class M store;
 ```
 
 The calculator parses a bounded numeric abstract syntax tree and never calls Python `eval`. The unit converter uses a fixed table for approved length, mass, and time units. Trusted search reuses V12 deterministic retrieval and citation verification. No shell, arbitrary-code, or network tool is registered.
@@ -328,6 +449,20 @@ flowchart TD
     F -->|No| H[Incomplete report]
     E --> I[(SQLite run snapshots)]
     H --> I
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B,G model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C logic;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    class D,F decision;
+    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    class E success;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class H failure;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class I store;
 ```
 
 Research tasks reuse V12 lexical retrieval with globally consistent source labels
@@ -367,6 +502,14 @@ flowchart TD
     E --> G[Evaluation report]
     F --> G
     G --> H[(SQLite reports and traces)]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class B model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C,D,E,F,G logic;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class H store;
 ```
 
 The fixed offline suite has five cases: arithmetic, conversion, compound tool use,
@@ -409,6 +552,18 @@ flowchart TD
     B -->|Reject| H[Rejected session]
     D -->|Reject| H
     F -->|Reject| H
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class A model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C,E logic;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class B,D,F human;
+    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    class G success;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class H failure;
 ```
 
 All review gates support pause and resume under the same session ID. They do not
@@ -459,6 +614,14 @@ flowchart TD
     B -->|Read saved view| H
     H -->|Saved results and review state| B
     B -->|JSON response| A
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class B,C,D,F,H logic;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class E model;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class G store;
 ```
 
 The graph reuses V14 task validation and execution, V12 trusted retrieval, V13
@@ -525,6 +688,22 @@ flowchart TD
     D --> E[V11-V13 Context]
     E --> F[V14-V16 Adaptation]
     F --> G[V17 Delivery]
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef foundations fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class A foundations;
+    classDef coordination fill:#CFFAFE,stroke:#0891B2,color:#164E63,stroke-width:2px;
+    class B coordination;
+    classDef control fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:2px;
+    class C control;
+    classDef reliability fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D,stroke-width:2px;
+    class D reliability;
+    classDef context fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class E context;
+    classDef adaptation fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class F adaptation;
+    classDef delivery fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    class G delivery;
 ```
 
 The architecture is intentionally incremental. V17 adds the application layer as a separate version while preserving the earlier runnable examples. Local application verification does not establish production readiness or public deployment.

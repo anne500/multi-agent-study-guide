@@ -15,6 +15,8 @@ and evidence-integrity checks. Earlier source files remain unchanged.
 
 ## Three review gates
 
+Diagram colors follow the [architecture color key](ARCHITECTURE.md#diagram-color-key).
+
 ```mermaid
 flowchart TD
     A[Prepare plan] --> B{Plan review}
@@ -29,6 +31,18 @@ flowchart TD
     B -->|Reject| H[Rejected session]
     D -->|Reject| H
     F -->|Reject| H
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class A model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C,E logic;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class B,D,F human;
+    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    class G success;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class H failure;
 ```
 
 Each gate can pause durably in SQLite. Only an explicit plan approval permits tool

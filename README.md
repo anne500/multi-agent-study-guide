@@ -1,6 +1,17 @@
-# Multi-Agent Study Guide with Python, LangGraph, Ollama, and Qwen
+<a id="multi-agent-study-guide-with-python-langgraph-ollama-and-qwen"></a>
+
+# 🤝 Multi-Agent Study Guide
+
+![Multi-Agent Study Guide: from three Python agents to a local review application](docs/assets/project-banner.svg)
 
 [![CI](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml/badge.svg)](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-3776AB?logo=python&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-Stateful%20workflows-2563EB)
+![Ollama](https://img.shields.io/badge/Ollama-Local%20inference-334155)
+![Qwen](https://img.shields.io/badge/Qwen-3.5%3A4b-7C3AED)
+![SQLite](https://img.shields.io/badge/SQLite-Durable%20state-0F766E?logo=sqlite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Verified%20locally-0284C7?logo=docker&logoColor=white)
+[![Release](https://img.shields.io/badge/Release-v17.0.0-15803D)](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0)
 
 A versioned learning project that builds local multi-agent study-guide workflows with Python, LangGraph, Ollama, and the `qwen3.5:4b` model.
 
@@ -8,27 +19,44 @@ The repository starts with a simple sequential pipeline and progressively adds g
 
 All LLM calls run locally through Ollama. No paid API key is required.
 
-## Version Roadmap
+| 🟦 Learn AI | 🟩 Explore the implementation | 🟪 Inspect the evidence |
+| --- | --- | --- |
+| Follow [17 progressive versions and their diagrams](docs/ARCHITECTURE.md) | Compare separate Python versions, from sequential agents to Review Studio | Read the [source and diagram audit](docs/FINAL_AUDIT.md) |
+| Practice retrieval, tools, memory, and human review | [Launch the browser app](V17_START_HERE.md) or [run an earlier example](#running-the-examples) | Inspect [CI and Docker checks](docs/CI_GUIDE.md) and the [published release](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0) |
 
-| Version | Capability introduced | Status |
-|---|---|---|
-| V1 | Plain Python sequential agents | Completed |
-| V2 | LangGraph sequential workflow | Completed |
-| V3 | Notes simplification | Completed |
-| V4 | Parallel specialist workers | Completed |
-| V5 | Orchestrator and subagent delegation | Completed |
-| V6 | Supervisor routing | Completed |
-| V7 | Human-in-the-loop approval | Completed |
-| V8 | Automated review and refinement | Completed |
-| V9 | Structured outputs, retry handling, orchestration, and safe fallback | Completed |
-| V10 | Persistent SQLite checkpointing and workflow recovery | Completed |
-| V11 | Cross-session learner memory | Completed |
-| V12 | Retrieval from trusted local documents with citations | Completed |
-| V13 | Controlled tool-using study agents | Completed |
-| V14 | Dynamic planning and agent selection | Completed |
-| V15 | Evaluation, tracing, metrics, and observability | Completed |
-| V16 | Multi-stage human approval and interactive revision | Completed |
-| V17 | User application, API, and local deployment | Completed locally and in Docker |
+**Jump to:** [🧭 Roadmap](#version-roadmap) · [🚀 Setup](#installation) · [▶️ Run](#running-the-examples) · [🧩 Architecture](#workflow-architecture) · [✅ Verification](#validation-and-reliability) · [🎨 Visual guide](docs/VISUAL_GUIDE.md)
+
+> [!NOTE]
+> The V1-V17 local, single-user learning scope was completed on **November 3, 2026**. The tested code baseline is **v17.0.0**. Visual documentation can continue to improve after that milestone.
+
+
+<a id="version-roadmap"></a>
+
+## 🧭 Version Roadmap
+
+![The seven-stage V1 to V17 learning journey](docs/assets/learning-journey.svg)
+
+Open a version number to jump to its architecture diagram. Each implementation remains a separate learning example.
+
+| Version | Learning stage | Capability introduced | Status |
+| --- | --- | --- | --- |
+| [V1](docs/ARCHITECTURE.md#v1-plain-python-sequential-agents) | 🟦 Foundations | Plain Python sequential agents | ✅ Completed |
+| [V2](docs/ARCHITECTURE.md#v2-langgraph-sequential-workflow) | 🟦 Foundations | LangGraph sequential workflow | ✅ Completed |
+| [V3](docs/ARCHITECTURE.md#v3-sequential-simplification) | 🟦 Foundations | Notes simplification | ✅ Completed |
+| [V4](docs/ARCHITECTURE.md#v4-parallel-specialist-workers) | 🟦 Coordination | Parallel specialist workers | ✅ Completed |
+| [V5](docs/ARCHITECTURE.md#v5-orchestrator-and-delegated-subagents) | 🟦 Coordination | Orchestrator and subagent delegation | ✅ Completed |
+| [V6](docs/ARCHITECTURE.md#v6-supervisor-routing) | 🟦 Coordination | Supervisor routing | ✅ Completed |
+| [V7](docs/ARCHITECTURE.md#v7-human-approval-loop) | 🟨 Control | Human-in-the-loop approval | ✅ Completed |
+| [V8](docs/ARCHITECTURE.md#v8-automated-review-and-refinement) | 🟨 Control | Automated review and refinement | ✅ Completed |
+| [V9](docs/ARCHITECTURE.md#v9-structured-multi-agent-workflow) | 🟥 Reliability | Structured outputs, retry handling, orchestration, and safe fallback | ✅ Completed |
+| [V10](docs/ARCHITECTURE.md#v10-persistent-checkpointing-and-recovery) | 🟥 Reliability | Persistent SQLite checkpointing and workflow recovery | ✅ Completed |
+| [V11](docs/ARCHITECTURE.md#v11-cross-session-learner-memory) | 🟪 Context | Cross-session learner memory | ✅ Completed |
+| [V12](docs/ARCHITECTURE.md#v12-retrieval-with-trusted-documents-and-citations) | 🟪 Context | Retrieval from trusted local documents with citations | ✅ Completed |
+| [V13](docs/ARCHITECTURE.md#v13-tool-using-study-agents) | 🟪 Context | Controlled tool-using study agents | ✅ Completed |
+| [V14](docs/ARCHITECTURE.md#v14-dynamic-planning-and-agent-selection) | 🟧 Adaptation | Dynamic planning and agent selection | ✅ Completed |
+| [V15](docs/ARCHITECTURE.md#v15-evaluation-and-observability) | 🟧 Adaptation | Evaluation, tracing, metrics, and observability | ✅ Completed |
+| [V16](docs/ARCHITECTURE.md#v16-multi-stage-human-approval) | 🟧 Adaptation | Multi-stage human approval and interactive revision | ✅ Completed |
+| [V17](docs/ARCHITECTURE.md#v17-application-and-deployment) | 🟩 Delivery | User application, API, and local deployment | ✅ Completed locally and in Docker |
 
 See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version. The [final source and diagram audit](docs/FINAL_AUDIT.md) records all 17 source comparisons, 23 successful diagram renders, and browser workflow checks.
 
@@ -36,7 +64,9 @@ V17 is verified as a local, single-user application both directly on Windows and
 
 **V1-V17 are complete for the documented local, single-user learning scope.** [V17.0.0 is published](https://github.com/anne500/multi-agent-study-guide/releases/tag/v17.0.0) at commit `34e0c4005f8de02fd26e13e79f022c6b489ba85e`. Its [release workflow](https://github.com/anne500/multi-agent-study-guide/actions/runs/41609663282) passed all four Windows/Linux and Python 3.12/3.14 test jobs, the Docker persistence job, and publication. The release includes source, the 43-package baseline, verification evidence, and SHA-256 checksums. See the [completion record](docs/PROJECT_STATUS.md) for evidence and remaining limitations, and the [release guide](docs/RELEASE_GUIDE.md) for installation and maintenance.
 
-## What Is an Agent Here?
+<a id="what-is-an-agent-here"></a>
+
+## 🧠 What Is an Agent Here?
 
 In this project, an agent is a focused LLM call with:
 
@@ -46,7 +76,12 @@ In this project, an agent is a focused LLM call with:
 
 Agents collaborate by passing outputs through Python variables or LangGraph shared state. Later versions add parallel state aggregation, conditional routing, validated schemas, retry controls, and durable checkpoints.
 
-## Project Files
+<a id="project-files"></a>
+
+## 🗂️ Project Files
+
+<details>
+<summary>Browse the complete source, test, and guide inventory</summary>
 
 | File | Architecture | Description |
 |---|---|---|
@@ -93,7 +128,11 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 | `docs/RELEASE_GUIDE.md` | Baseline and release procedure | Documents platform evidence, publication history, recovery, and maintenance |
 | `docs/PROJECT_STATUS.md` | Completion and evidence | Records the published baseline, verified scope, known limits, and separate ReleaseTruth fixture issue |
 
-## Requirements
+</details>
+
+<a id="requirements"></a>
+
+## 🧰 Requirements
 
 - Python
 - [Ollama](https://ollama.com/)
@@ -105,7 +144,9 @@ Agents collaborate by passing outputs through Python variables or LangGraph shar
 
 Developed and tested on Windows with Python 3.14. CI also verifies CPython 3.12 and 3.14 on Windows and Linux x86-64.
 
-## Installation
+<a id="installation"></a>
+
+## 🚀 Installation
 
 ### 1. Install Ollama
 
@@ -140,7 +181,9 @@ python -m pip install -r requirements-v17.lock
 python -m pip check
 ```
 
-## Running the Examples
+<a id="running-the-examples"></a>
+
+## ▶️ Running the Examples
 
 | Version | Command |
 |---|---|
@@ -236,7 +279,9 @@ selected by default. Uncheck it before creating a session to use Ollama. Review
 and approve the plan, content, and final evidence questions. The existing
 requirements are sufficient; V17 adds no package or frontend-build dependency.
 
-## Continuous Integration
+<a id="continuous-integration"></a>
+
+## 🛠️ Continuous Integration
 
 The CI workflow runs on pushes to main, pull requests targeting main, and manual
 dispatch. Four jobs cover Python 3.12 and 3.14 on Ubuntu 24.04 and Windows 2025.
@@ -266,7 +311,43 @@ then repeated all five checks for commit `34e0c40` and published `v17.0.0`.
 The V1-V17 roadmap is preserved. The version-specific release workflow has finished
 its purpose; do not dispatch it again for the existing tag.
 
-## Workflow Architecture
+<a id="workflow-architecture"></a>
+
+## 🧩 Workflow Architecture
+
+### Review Studio approval flow
+
+V17 runs the V16 review workflow behind its browser and JSON API. Each orange review gate is a durable pause point. Tools run after plan approval; content and final approval remain separate decisions.
+
+```mermaid
+flowchart TD
+    A[Prepare plan] --> B{Plan review}
+    B -->|Approve| C[Execute approved tasks]
+    C --> D{Content review}
+    D -->|Approve| E[Prepare evidence questions]
+    E --> F{Final review}
+    F -->|Approve| G[Approved session]
+    B -->|Revise| B
+    D -->|Revise plan| B
+    F -->|Revise plan| B
+    B -->|Reject| H[Rejected session]
+    D -->|Reject| H
+    F -->|Reject| H
+
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    class A model;
+    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    class C,E logic;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    class B,D,F human;
+    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    class G success;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class H failure;
+```
+
+See the [V17 request, worker, and storage diagram](docs/ARCHITECTURE.md#v17-application-and-deployment) for the application layer, and the [color key](docs/ARCHITECTURE.md#diagram-color-key) for diagram roles.
 
 The [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) contains the complete visual architecture reference. The summary below describes the implemented workflows.
 
@@ -304,7 +385,9 @@ reject: Make each section practical and include one real-world example.
 
 A producer writes a quiz and a reviewer evaluates it against explicit requirements. Rejected quizzes return to a revision node until approved or until the revision limit is reached.
 
-## V9: Structured Outputs and Safe Review
+<a id="v9-structured-outputs-and-safe-review"></a>
+
+## 🛡️ V9: Structured Outputs and Safe Review
 
 V9 combines several advanced workflow patterns in one graph:
 
@@ -327,7 +410,9 @@ V9 also includes:
 
 V10 adds quiz preservation, `fallback_approved` routing after reviewer parsing failure, and protection against blank quiz-reviser output. Those improvements are in the V10 implementation reused by V11/V12; they are not retroactively implemented in the separate V9 file.
 
-## V10: Persistent Checkpointing and Recovery
+<a id="v10-persistent-checkpointing-and-recovery"></a>
+
+## 💾 V10: Persistent Checkpointing and Recovery
 
 V10 extends the V9 workflow with LangGraph's `SqliteSaver`. Each session uses a thread ID and stores its graph state in `study_guide_checkpoints.sqlite`.
 
@@ -367,7 +452,9 @@ Next scheduled nodes: ()
 ```
 
 
-## V11: Cross-Session Learner Memory
+<a id="v11-cross-session-learner-memory"></a>
+
+## 🧠 V11: Cross-Session Learner Memory
 
 V11 reuses the tested V10 workflow and adds a separate `learner_memory.sqlite` store for durable learner facts across different sessions and topics. V10 checkpoints continue to preserve one workflow run, while V11 memory preserves validated learner context.
 
@@ -401,7 +488,9 @@ Two SQLite databases serve different purposes:
 
 The deterministic V11 suite runs eight tests without Ollama or network calls. It verifies normalization, persistence after reopening SQLite, completed-topic deduplication, quiz history, recurring mistakes, learner isolation, validation failures, and safe behavior for unknown learners.
 
-## V12: Trusted Retrieval with Verified Citations
+<a id="v12-trusted-retrieval-with-verified-citations"></a>
+
+## 📚 V12: Trusted Retrieval with Verified Citations
 
 V12 adds retrieval-augmented generation over approved local Markdown documents while preserving V11 learner memory and V10 workflow reliability. It does not require a vector database or network service.
 
@@ -429,7 +518,9 @@ The deterministic V12 suite runs 19 tests without Ollama, network access, a vect
 
 The verified end-to-end Conservation of Energy run recalled the V11 beginner profile, retrieved four approved chunks, produced three substantive cited sections and three independently cited quiz questions, received `approved` structured-review status, received `valid` deterministic citation status, and completed in about 3,056 seconds. The approved outcome was then saved to learner memory without storing generated notes as trusted facts.
 
-## V13: Controlled Tool-Using Study Agent
+<a id="v13-controlled-tool-using-study-agent"></a>
+
+## 🔧 V13: Controlled Tool-Using Study Agent
 
 V13 adds a bounded tool-use loop without granting the model arbitrary execution privileges. A structured controller may choose one of three approved local tools or return a final response grounded in validated observations.
 
@@ -447,7 +538,9 @@ The LangGraph loop is bounded to two tool calls. Model selection receives one co
 
 The deterministic V13 suite runs 30 tests without Ollama, network access, LangGraph execution, or a persistent database. A verified end-to-end run selected `unit_converter`, converted 5 kilometers to 5,000 meters, retained `[T1]`, and completed successfully. A second test against the actual V12 corpus returned approved friction and energy passages with `[S1]`, `[S2]`, and `[T1]`, and passed deterministic observation validation.
 
-## V14: Dynamic Planning and Agent Selection
+<a id="v14-dynamic-planning-and-agent-selection"></a>
+
+## 🧭 V14: Dynamic Planning and Agent Selection
 
 V14 plans up to four tasks and selects only the required researcher, calculator,
 or converter specialists. Ollama produces a structured plan; deterministic schema
@@ -481,7 +574,9 @@ natural-language goal was decomposed correctly, that retrieval covered every
 requested concept, or that the learner mastered the topic. See
 [the V14 guide](docs/V14_GUIDE.md) for usage and limitations.
 
-## V15: Evaluation, Tracing, Metrics, and Observability
+<a id="v15-evaluation-tracing-metrics-and-observability"></a>
+
+## 📊 V15: Evaluation, Tracing, Metrics, and Observability
 
 V15 instruments the V14 workflow through node wrappers and a structured-model
 wrapper. It records ordered traces, elapsed offsets, phase and model-call
@@ -507,7 +602,9 @@ retrieval relevance, learner mastery, or completeness of an explanation. The
 five fixed cases are an offline regression suite, not a broad model-quality
 benchmark. See [the V15 guide](docs/V15_GUIDE.md) for precise definitions.
 
-## V16: Multi-stage Human Approval and Interactive Revision
+<a id="v16-multi-stage-human-approval-and-interactive-revision"></a>
+
+## 🙋 V16: Multi-stage Human Approval and Interactive Revision
 
 V16 uses LangGraph interrupts and SQLite checkpoints for three explicit review
 points: plan approval before tool execution, content approval before assessment
@@ -541,7 +638,9 @@ automatic replay when a session stopped outside a review gate. Use one local
 process per session. This is a local review workflow without authenticated reviewer
 identity or tamper-proof audit storage. See [the V16 guide](docs/V16_GUIDE.md).
 
-## V17: Review Studio, JSON API, and Local Deployment
+<a id="v17-review-studio-json-api-and-local-deployment"></a>
+
+## 🖥️ V17: Review Studio, JSON API, and Local Deployment
 
 V17 exposes V16's workflow through a local browser application and an asynchronous
 JSON API. Create sessions, inspect structured plans and results, approve each gate,
@@ -583,7 +682,12 @@ and retained all three approvals. Its planning phase took 479.237 seconds, about
 7 minutes 59 seconds. Replacing that container while keeping the named volume
 restored the exact saved snapshot with one execution and three approvals.
 
-## Validation and Reliability
+<a id="validation-and-reliability"></a>
+
+## ✅ Validation and Reliability
+
+<details>
+<summary>Expand the per-version verification record, V10-V17</summary>
 
 The following V10 paths were verified:
 
@@ -698,7 +802,11 @@ The following V17 evidence was verified:
 11. The original container was removed and recreated with the same study-guide-v17-data volume mounted at /data. The API comparison returned ContainerReplaced=True, Status=approved, ToolExecutions=1, Approvals=3, and SnapshotUnchanged=True.
 12. The manual Docker runtime check verified a completed session surviving replacement. The subsequent hosted CI probe also verified an unchanged pending content-review snapshot across replacement, review resume, stale-decision rejection, and duplicate-decision preservation. These checks do not establish crash-time exactly-once execution. Public deployment, LAN isolation, and automated container browser tests were not verified. Build-specific ignore enforcement on the older tested builder was not separately established.
 
-## Observed Local Timings
+</details>
+
+<a id="observed-local-timings"></a>
+
+## ⏱️ Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. Runtime measurements were recorded on the Windows laptop, including its Linux Docker engine. Test rows identify the environment used; authoring and Windows measurements are not directly comparable.
 
@@ -739,7 +847,9 @@ Performance varies with hardware, prompt length, output length, and Ollama sched
 
 The long V10 diagnostic run identified a reliability problem inherited from the V9 review loop. The tested fallback correction now prevents parser failure from triggering repeated quiz revisions.
 
-## Lessons Learned
+<a id="lessons-learned"></a>
+
+## 💡 Lessons Learned
 
 - A multi-agent system can be built with regular Python and focused LLM calls.
 - LangGraph makes state, branching, parallel execution, interrupts, and loops explicit.
@@ -773,7 +883,9 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - A named volume must be tested across container replacement, not inferred from its mount configuration alone.
 - Local LLM output should still be checked for factual accuracy.
 
-## Project Origin and Extension History
+<a id="project-origin-and-extension-history"></a>
+
+## 📖 Project Origin and Extension History
 
 This repository began as a hands-on implementation of Darsh Shah's freeCodeCamp article, [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/), published July 14, 2026.
 
@@ -792,6 +904,8 @@ Starting with V3, this repository extends the tutorial by implementing, testing,
 
 The versioned structure makes it possible to compare architectures, observe the reason for each extension, and retain working examples from every stage.
 
-## Acknowledgements
+<a id="acknowledgements"></a>
+
+## 🙏 Acknowledgements
 
 Inspired by Darsh Shah's freeCodeCamp tutorial, [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/).
