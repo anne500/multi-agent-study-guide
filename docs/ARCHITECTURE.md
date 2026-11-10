@@ -49,11 +49,17 @@ flowchart LR
     C -->|Notes| D[Quiz writer]
     D --> E[Study guide]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
     class B,C,D model;
-    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
-    class E success;
+    class E output;
 ```
 
 ## V2: LangGraph sequential workflow
@@ -69,8 +75,15 @@ flowchart LR
     C --> D[Quiz writer node]
     D --> E([END])
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
     class B,C,D model;
 ```
 
@@ -88,8 +101,15 @@ flowchart TD
     D --> E[Quiz writer]
     E --> F([END])
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
     class B,C,D,E model;
 ```
 
@@ -109,8 +129,15 @@ flowchart TD
     D --> E
     E --> F([END])
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
     class B,C,D,E model;
 ```
 
@@ -131,11 +158,17 @@ flowchart TD
     E --> F
     F --> G([END])
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class F process;
     class B,C,D,E model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class F logic;
 ```
 
 ## V6: Supervisor routing
@@ -153,8 +186,15 @@ flowchart TD
     D --> E
     E --> F([END])
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
     class B,C,D,E model;
 ```
 
@@ -174,10 +214,16 @@ flowchart TD
     D --> F[Quiz writer]
     F --> G([END])
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class B,D,E,F model;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
     classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class B,D,E,F model;
     class C human;
 ```
 
@@ -197,8 +243,15 @@ flowchart TD
     F --> D
     D -->|Maximum revisions| E
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
     class B,C,D,F model;
 ```
 
@@ -221,11 +274,17 @@ flowchart TD
     I --> G
     G -->|Two-revision limit reached| H
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class E process;
     class B,C,D,F,G,I model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class E logic;
 ```
 
 ### V9 reviewer retry and fallback
@@ -242,13 +301,18 @@ flowchart TD
     G -->|No| H[Revise quiz and review again]
     G -->|Yes| I[Stop at max_iterations]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class A,D,H model;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
     classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class C,F process;
+    class A,D,H model;
     class B,E,G decision;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class C,F logic;
 ```
 
 This retry belongs to the reviewer. V9 router parsing errors propagate; the orchestrator uses validated fallback assignments when its response fails or is unsuitable. V9 reviewer parse failure requests revision and can terminate at the revision cap. V10 separately introduces `fallback_approved` to preserve the existing nonblank quiz without another revision loop, and preserves quiz text when a reviser returns blank output.
@@ -272,15 +336,19 @@ flowchart TD
     G -->|Before quiz| H[Save and exit]
     G -->|No| I[Continue to completion]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
-    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
-    class B,G decision;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class C model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class D,E,I logic;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class D,E,I process;
+    class C model;
     class F store;
+    class B,G decision;
 ```
 
 ### V10 workflow with persistence
@@ -296,12 +364,17 @@ flowchart LR
     C <--> F
     D <--> F
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class A,B,D model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class C logic;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class C process;
+    class A,B,D model;
     class F store;
 ```
 
@@ -326,15 +399,19 @@ flowchart TD
     J -->|Yes| L[Validate learner outcome]
     L --> C
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class B,D,L logic;
-    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
-    class E,J human;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class G model;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class B,D,L process;
+    class G model;
     class C,H store;
+    class E,J human;
 ```
 
 The learner-memory store contains learner level, preferences, completed topics, quiz performance, recurring mistakes, and recent progress. Generated study-guide text is not stored as trusted memory. The eight deterministic tests verify validation, persistence, deduplication, learner isolation, summaries, and safe outcome storage without calling Ollama.
@@ -364,18 +441,20 @@ flowchart TD
     O -->|Yes| C
     O -->|No| P[Keep generated text untrusted]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class B,D,F logic;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class H,I,K model;
-    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
-    class G,M decision;
-    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
-    class O human;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
-    class C,E,N store;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
     classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class B,D,F process;
+    class H,I,K model;
+    class C,E,N store;
+    class G,M decision;
+    class O human;
     class R failure;
 ```
 
@@ -409,17 +488,20 @@ flowchart TD
     D --> L[Final answer with completed or safe_failure status]
     L <--> M[(V13 checkpoint SQLite)]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class B model;
-    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
-    class C,G decision;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class D,E,H,I,J,K logic;
-    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
-    class F failure;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class D,E,H,I,J,K process;
+    class B model;
     class M store;
+    class C,G decision;
+    class F failure;
 ```
 
 The calculator parses a bounded numeric abstract syntax tree and never calls Python `eval`. The unit converter uses a fixed table for approved length, mass, and time units. Trusted search reuses V12 deterministic retrieval and citation verification. No shell, arbitrary-code, or network tool is registered.
@@ -450,19 +532,21 @@ flowchart TD
     E --> I[(SQLite run snapshots)]
     H --> I
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class B,G model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class C logic;
-    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
-    class D,F decision;
-    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
-    class E success;
-    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
-    class H failure;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class C process;
+    class B,G model;
     class I store;
+    class D,F decision;
+    class E output;
+    class H failure;
 ```
 
 Research tasks reuse V12 lexical retrieval with globally consistent source labels
@@ -503,12 +587,17 @@ flowchart TD
     F --> G
     G --> H[(SQLite reports and traces)]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class B model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class C,D,E,F,G logic;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class C,D,E,F,G process;
+    class B model;
     class H store;
 ```
 
@@ -553,16 +642,19 @@ flowchart TD
     D -->|Reject| H
     F -->|Reject| H
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class A model;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class C,E logic;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
     classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
-    class B,D,F human;
-    classDef success fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
-    class G success;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
     classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class C,E process;
+    class A model;
+    class B,D,F human;
+    class G output;
     class H failure;
 ```
 
@@ -615,12 +707,17 @@ flowchart TD
     H -->|Saved results and review state| B
     B -->|JSON response| A
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
-    classDef logic fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class B,C,D,F,H logic;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
     classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class E model;
     classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class B,C,D,F,H process;
+    class E model;
     class G store;
 ```
 
@@ -689,21 +786,20 @@ flowchart TD
     E --> F[V14-V16 Adaptation]
     F --> G[V17 Delivery]
 
-    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
-    classDef foundations fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
-    class A foundations;
-    classDef coordination fill:#CFFAFE,stroke:#0891B2,color:#164E63,stroke-width:2px;
-    class B coordination;
-    classDef control fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:2px;
-    class C control;
-    classDef reliability fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D,stroke-width:2px;
-    class D reliability;
-    classDef context fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
-    class E context;
-    classDef adaptation fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
-    class F adaptation;
-    classDef delivery fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
-    class G delivery;
+    %% Shared architecture palette: see VISUAL_STYLE.md
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef process fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    classDef model fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef store fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px;
+    classDef decision fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef human fill:#FFEDD5,stroke:#C2410C,color:#7C2D12,stroke-width:2px;
+    classDef output fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef failure fill:#FEE2E2,stroke:#B91C1C,color:#7F1D1D,stroke-width:2px;
+    class A,B process;
+    class E model;
+    class C,D decision;
+    class F human;
+    class G output;
 ```
 
 The architecture is intentionally incremental. V17 adds the application layer as a separate version while preserving the earlier runnable examples. Local application verification does not establish production readiness or public deployment.
