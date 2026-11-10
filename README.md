@@ -4,6 +4,16 @@
 
 # 🤝 Multi-Agent Study Guide
 
+![Project overview and reading map](assets/readme-overview.svg)
+
+**🟦 Learn AI · 🟩 Portfolio evidence · 🟪 PhD research · 🟠 Planned work**
+
+<a id="explore-the-project"></a>
+
+## 🧭 Explore the project
+
+[🧩 Architecture](#workflow-architecture) · [🚀 Setup](#installation) · [🧪 Results & verification](#validation-and-reliability) · [🗂️ Evidence & guides](#project-files) · [🎨 Visual standard](VISUAL_STYLE.md)
+
 ![Multi-Agent Study Guide: from three Python agents to a local review application](docs/assets/project-banner.svg)
 
 [![CI](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml/badge.svg)](https://github.com/anne500/multi-agent-study-guide/actions/workflows/ci.yml)
@@ -68,7 +78,7 @@ V17 is verified as a local, single-user application both directly on Windows and
 
 <a id="what-is-an-agent-here"></a>
 
-## 🧠 What Is an Agent Here?
+## 🤖 What Is an Agent Here?
 
 In this project, an agent is a focused LLM call with:
 
@@ -150,17 +160,23 @@ Developed and tested on Windows with Python 3.14. CI also verifies CPython 3.12 
 
 ## 🚀 Installation
 
-### 1. Install Ollama
+<a id="1-install-ollama"></a>
+
+### 🚀 1. Install Ollama
 
 Download Ollama from [ollama.com/download](https://ollama.com/download).
 
-### 2. Pull the model
+<a id="2-pull-the-model"></a>
+
+### 🚀 2. Pull the model
 
 ```powershell
 ollama pull qwen3.5:4b
 ```
 
-### 3. Create and activate a virtual environment
+<a id="3-create-and-activate-a-virtual-environment"></a>
+
+### 🚀 3. Create and activate a virtual environment
 
 Windows PowerShell:
 
@@ -176,7 +192,9 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 4. Install dependencies
+<a id="4-install-dependencies"></a>
+
+### 🚀 4. Install dependencies
 
 ```powershell
 python -m pip install -r requirements-v17.lock
@@ -317,7 +335,9 @@ its purpose; do not dispatch it again for the existing tag.
 
 ## 🧩 Workflow Architecture
 
-### Review Studio approval flow
+<a id="review-studio-approval-flow"></a>
+
+### 👤 Review Studio approval flow
 
 V17 runs the V16 review workflow behind its browser and JSON API. Each orange review gate is a durable pause point. Tools run after plan approval; content and final approval remain separate decisions.
 
@@ -356,27 +376,39 @@ See the [V17 request, worker, and storage diagram](docs/ARCHITECTURE.md#v17-appl
 
 The [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) contains the complete visual architecture reference. The summary below describes the implemented workflows.
 
-### V1 and V2: Sequential Pipeline
+<a id="v1-and-v2-sequential-pipeline"></a>
+
+### 🧩 V1 and V2: Sequential Pipeline
 
 A planner creates an outline, a teacher writes notes, and a quiz writer produces review questions. V1 uses regular Python. V2 expresses the same sequence as a LangGraph graph.
 
-### V3: Simplification
+<a id="v3-simplification"></a>
+
+### 🧠 V3: Simplification
 
 A fourth agent rewrites the generated notes in clearer language.
 
-### V4: Parallel Specialists
+<a id="v4-parallel-specialists"></a>
+
+### 🧩 V4: Parallel Specialists
 
 Multiple agents work independently on the same topic. Their outputs are collected after all parallel branches finish.
 
-### V5: Orchestrator and Subagents
+<a id="v5-orchestrator-and-subagents"></a>
+
+### 🧩 V5: Orchestrator and Subagents
 
 An orchestrator analyzes the topic, creates assignments, and delegates them to parallel subagents.
 
-### V6: Supervisor and Router
+<a id="v6-supervisor-and-router"></a>
+
+### 🧩 V6: Supervisor and Router
 
 A routing agent examines the learning request and selects either a beginner or advanced teaching branch.
 
-### V7: Human-in-the-Loop
+<a id="v7-human-in-the-loop"></a>
+
+### 👤 V7: Human-in-the-Loop
 
 The graph pauses after preparing an outline. A human can approve it or reject it with revision feedback.
 
@@ -386,7 +418,9 @@ Example rejection:
 reject: Make each section practical and include one real-world example.
 ```
 
-### V8: Review and Refinement
+<a id="v8-review-and-refinement"></a>
+
+### 🔁 V8: Review and Refinement
 
 A producer writes a quiz and a reviewer evaluates it against explicit requirements. Rejected quizzes return to a revision node until approved or until the revision limit is reached.
 
@@ -431,7 +465,9 @@ V10 supports:
 - Keeping the SQLite database and sidecar files out of Git
 - Importing the module without starting the interactive command-line workflow
 
-### Start or Load a Session
+<a id="start-or-load-a-session"></a>
+
+### 💾 Start or Load a Session
 
 ```powershell
 python .\study_guide_v10_checkpointing.py
@@ -439,7 +475,9 @@ python .\study_guide_v10_checkpointing.py
 
 Enter a unique session ID. If that ID already exists, V10 asks whether to resume or load it.
 
-### Pause and Resume
+<a id="pause-and-resume"></a>
+
+### ⏯️ Pause and Resume
 
 Start a session that pauses before quiz generation:
 
@@ -459,7 +497,7 @@ Next scheduled nodes: ()
 
 <a id="v11-cross-session-learner-memory"></a>
 
-## 🧠 V11: Cross-Session Learner Memory
+## 💾 V11: Cross-Session Learner Memory
 
 V11 reuses the tested V10 workflow and adds a separate `learner_memory.sqlite` store for durable learner facts across different sessions and topics. V10 checkpoints continue to preserve one workflow run, while V11 memory preserves validated learner context.
 
@@ -495,7 +533,7 @@ The deterministic V11 suite runs eight tests without Ollama or network calls. It
 
 <a id="v12-trusted-retrieval-with-verified-citations"></a>
 
-## 📚 V12: Trusted Retrieval with Verified Citations
+## 🧪 V12: Trusted Retrieval with Verified Citations
 
 V12 adds retrieval-augmented generation over approved local Markdown documents while preserving V11 learner memory and V10 workflow reliability. It does not require a vector database or network service.
 
@@ -609,7 +647,7 @@ benchmark. See [the V15 guide](docs/V15_GUIDE.md) for precise definitions.
 
 <a id="v16-multi-stage-human-approval-and-interactive-revision"></a>
 
-## 🙋 V16: Multi-stage Human Approval and Interactive Revision
+## 👤 V16: Multi-stage Human Approval and Interactive Revision
 
 V16 uses LangGraph interrupts and SQLite checkpoints for three explicit review
 points: plan approval before tool execution, content approval before assessment
@@ -689,7 +727,7 @@ restored the exact saved snapshot with one execution and three approvals.
 
 <a id="validation-and-reliability"></a>
 
-## ✅ Validation and Reliability
+## 🧪 Validation and Reliability
 
 <details>
 <summary>Expand the per-version verification record, V10-V17</summary>
@@ -811,7 +849,7 @@ The following V17 evidence was verified:
 
 <a id="observed-local-timings"></a>
 
-## ⏱️ Observed Local Timings
+## 📊 Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. Runtime measurements were recorded on the Windows laptop, including its Linux Docker engine. Test rows identify the environment used; authoring and Windows measurements are not directly comparable.
 
@@ -890,7 +928,7 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 
 <a id="project-origin-and-extension-history"></a>
 
-## 📖 Project Origin and Extension History
+## 📚 Project Origin and Extension History
 
 This repository began as a hands-on implementation of Darsh Shah's freeCodeCamp article, [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/), published July 14, 2026.
 
@@ -911,6 +949,6 @@ The versioned structure makes it possible to compare architectures, observe the 
 
 <a id="acknowledgements"></a>
 
-## 🙏 Acknowledgements
+## 📚 Acknowledgements
 
 Inspired by Darsh Shah's freeCodeCamp tutorial, [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/).
