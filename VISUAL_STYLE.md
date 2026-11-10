@@ -43,3 +43,16 @@ Apply classes with assignments such as `class ModelNode model;` and
 
 The learning roadmap uses its own documented learning/research categories;
 architecture colors describe component roles.
+
+## README presentation standard
+
+- Begin with a project-specific title icon and a colored overview graphic.
+- Use the same section icons: 🧩 architecture, ✨ features, 🧰 requirements,
+  🚀 setup, ⚙️ configuration, 💬 examples, 🧪 verification,
+  📊 results, 🗂️ evidence, 💾 storage, ⚠️ limitations,
+  🧭 roadmap, 🟪 research, and 📚 attribution.
+- Add compact navigation with stable section anchors.
+- Use meaningful diagrams, result graphics, and comparison tables throughout.
+- Preserve examples, evidence boundaries, and limitations when improving presentation.
+- Label pass, fail, planned, and unverified states in text as well as color.
+- Keep technical code blocks copyable and free from decorative edits.
