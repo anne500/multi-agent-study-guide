@@ -2,6 +2,9 @@
 
 🎨 [Shared architecture colors and diagram conventions](VISUAL_STYLE.md)
 
+> **📚 Tutorial foundation:** This learning project is based on [Darsh Shah's freeCodeCamp tutorial](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/). See [Tutorial Acknowledgment and Attribution](#tutorial-acknowledgment-and-attribution) for the original source and the repository's extensions.
+
+
 # 🤝 Multi-Agent Study Guide
 
 ![Project overview and reading map](assets/readme-overview.svg)
@@ -949,6 +952,23 @@ The versioned structure makes it possible to compare architectures, observe the 
 
 <a id="acknowledgements"></a>
 
-## 📚 Acknowledgements
+<a id="tutorial-acknowledgment-and-attribution"></a>
+
+## 📚 Tutorial Acknowledgment and Attribution
+
+We acknowledge **Darsh Shah** as the author of the foundational tutorial published by **freeCodeCamp**:
+
+**[How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/)**  
+Published: July 14, 2026.
+
+| Credit and provenance | Description |
+| --- | --- |
+| 👨‍🏫 Original author | Darsh Shah |
+| 📚 Publisher | freeCodeCamp |
+| 🧱 Tutorial foundation | V1 plain-Python and V2 LangGraph sequential study-guide workflows. |
+| 🛠️ Repository adaptations and extensions | V3-V17 implementations, reliability checks, memory, retrieval, controlled tools, evaluation, human review, local UI, and deployment verification. |
+
+The tutorial is credited for the original learning foundation. Repository-specific adaptations, experiments, verification records, and research connections are documented separately in the project documentation.
+
 
 Inspired by Darsh Shah's freeCodeCamp tutorial, [How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/).
