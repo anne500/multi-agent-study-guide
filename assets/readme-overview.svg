@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+<title id="title">Multi-Agent Study Guide: project reading map</title>
+<desc id="desc">From model roles to coordinated workflows, memory, and human review. Plan: Outline the study goal: Model roles. Coordinate: Route and review work: Workflow control. Remember: Keep session evidence: SQLite and retrieval. Inspect: Review saved outcomes: Human review.</desc>
+<rect width="1200" height="360" rx="22" fill="#F8FAFC"/>
+<path d="M22 0H1178Q1200 0 1200 22V122H0V22Q0 0 22 0" fill="#0F172A"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="32" y="31" font-size="13" font-weight="700" letter-spacing="2" fill="#93C5FD">LOCAL AI LEARNING / PROJECT READING MAP</text>
+<text x="32" y="70" font-size="30" font-weight="700" fill="#FFFFFF">Multi-Agent Study Guide</text>
+<text x="32" y="101" font-size="16" fill="#CBD5E1">From model roles to coordinated workflows, memory, and human review</text>
+<rect x="32" y="147" width="266" height="143" rx="14" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/>
+<text x="50" y="175" font-size="12" font-weight="700" fill="#7C3AED">01 / MODEL</text>
+<text x="50" y="209" font-size="24" font-weight="700" fill="#3B0764">Plan</text>
+<text x="50" y="241" font-size="15" fill="#3B0764">Outline the study goal</text>
+<text x="50" y="267" font-size="14" fill="#3B0764">Model roles</text>
+<rect x="322" y="147" width="266" height="143" rx="14" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/>
+<text x="340" y="175" font-size="12" font-weight="700" fill="#2563EB">02 / PROCESS</text>
+<text x="340" y="209" font-size="24" font-weight="700" fill="#172554">Coordinate</text>
+<text x="340" y="241" font-size="15" fill="#172554">Route and review work</text>
+<text x="340" y="267" font-size="14" fill="#172554">Workflow control</text>
+<rect x="612" y="147" width="266" height="143" rx="14" fill="#CCFBF1" stroke="#0F766E" stroke-width="2"/>
+<text x="630" y="175" font-size="12" font-weight="700" fill="#0F766E">03 / STORE</text>
+<text x="630" y="209" font-size="24" font-weight="700" fill="#134E4A">Remember</text>
+<text x="630" y="241" font-size="15" fill="#134E4A">Keep session evidence</text>
+<text x="630" y="267" font-size="14" fill="#134E4A">SQLite and retrieval</text>
+<rect x="902" y="147" width="266" height="143" rx="14" fill="#FFEDD5" stroke="#C2410C" stroke-width="2"/>
+<text x="920" y="175" font-size="12" font-weight="700" fill="#C2410C">04 / HUMAN</text>
+<text x="920" y="209" font-size="24" font-weight="700" fill="#7C2D12">Inspect</text>
+<text x="920" y="241" font-size="15" fill="#7C2D12">Review saved outcomes</text>
+<text x="920" y="267" font-size="14" fill="#7C2D12">Human review</text>
+<text x="32" y="332" font-size="14" fill="#475569">Explore the architecture  /  Run the examples  /  Inspect the evidence  /  Review the limitations</text>
+</g></svg>
