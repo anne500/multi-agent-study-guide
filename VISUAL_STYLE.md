@@ -56,3 +56,7 @@ architecture colors describe component roles.
 - Preserve examples, evidence boundaries, and limitations when improving presentation.
 - Label pass, fail, planned, and unverified states in text as well as color.
 - Keep technical code blocks copyable and free from decorative edits.
+
+## Tutorial provenance standard
+
+Each project README must visibly acknowledge the related tutorial author and publisher, link the exact tutorial title, and distinguish the original learning foundation from repository-specific adaptations, experiments, and research connections. For this learning sequence, credit Darsh Shah and freeCodeCamp in the introductory callout and the Tutorial Acknowledgment and Attribution section.
