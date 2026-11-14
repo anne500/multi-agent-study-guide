@@ -11,6 +11,21 @@
 
 **🟦 Learn AI · 🟩 Portfolio evidence · 🟪 PhD research · 🟠 Planned work**
 
+## 🟦 Base tutorial
+
+V1 and V2 adapt the tutorial’s sequential study-guide workflow in plain Python and LangGraph. The article also introduces other orchestration patterns. [Darsh Shah’s freeCodeCamp tutorial: How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/)
+
+## 🧩 Extensions added in Project 1
+
+| Extension | What this project added |
+| --- | --- |
+| **V3–V8** | Implemented simplification, parallel specialists, orchestration, routing, human review, and iterative refinement. |
+| **V9–V12** | Added structured outputs and fallback, persistent checkpoint recovery, cross-session learner memory, and retrieval with citation checks. |
+| **V13–V16** | Added controlled tool use, dynamic planning, evaluation and tracing, and multi-stage approval. |
+| **V17** | Built Review Studio with a browser UI, JSON API, durable review sessions, and a verified local Docker deployment. |
+
+See the [version roadmap](#version-roadmap) and [architecture guide](docs/ARCHITECTURE.md) for the implementation and evidence by version.
+
 <a id="explore-the-project"></a>
 
 ## 🧭 Explore the project
