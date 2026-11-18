@@ -11,18 +11,21 @@
 
 **🟦 Learn AI · 🟩 Portfolio evidence · 🟪 PhD research · 🟠 Planned work**
 
+<a id="base-tutorial"></a>
+
 ## 🟦 Base tutorial
 
 V1 and V2 adapt the tutorial’s sequential study-guide workflow in plain Python and LangGraph. The article also introduces other orchestration patterns. [Darsh Shah’s freeCodeCamp tutorial: How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/)
 
 ## 🧩 Extensions added in Project 1
 
-| Extension | What this project added |
-| --- | --- |
-| **V3–V8** | Implemented simplification, parallel specialists, orchestration, routing, human review, and iterative refinement. |
-| **V9–V12** | Added structured outputs and fallback, persistent checkpoint recovery, cross-session learner memory, and retrieval with citation checks. |
-| **V13–V16** | Added controlled tool use, dynamic planning, evaluation and tracing, and multi-stage approval. |
-| **V17** | Built Review Studio with a browser UI, JSON API, durable review sessions, and a verified local Docker deployment. |
+| Origin | Item | Scope or contribution | Verification |
+| --- | --- | --- | --- |
+| 🟦 Tutorial baseline | [Base tutorial](#base-tutorial) | **V1–V2.** Adapt the tutorial’s sequential study-guide workflow in plain Python and LangGraph. | [Baseline details](#base-tutorial) |
+| 🧩 Extension | **V3–V8** | Implemented simplification, parallel specialists, orchestration, routing, human review, and iterative refinement. | [Evidence](#version-roadmap) |
+| 🧩 Extension | **V9–V12** | Added structured outputs and fallback, persistent checkpoint recovery, cross-session learner memory, and retrieval with citation checks. | [Evidence](#version-roadmap) |
+| 🧩 Extension | **V13–V16** | Added controlled tool use, dynamic planning, evaluation and tracing, and multi-stage approval. | [Evidence](#version-roadmap) |
+| 🧩 Extension | **V17** | Built Review Studio with a browser UI, JSON API, durable review sessions, and a verified local Docker deployment. | [Evidence](#validation-and-reliability) |
 
 See the [version roadmap](#version-roadmap) and [architecture guide](docs/ARCHITECTURE.md) for the implementation and evidence by version.
 
@@ -68,25 +71,25 @@ All LLM calls run locally through Ollama. No paid API key is required.
 
 Open a version number to jump to its architecture diagram. Each implementation remains a separate learning example.
 
-| Version | Learning stage | Capability introduced | Status |
-| --- | --- | --- | --- |
-| [V1](docs/ARCHITECTURE.md#v1-plain-python-sequential-agents) | 🟦 Foundations | Plain Python sequential agents | ✅ Completed |
-| [V2](docs/ARCHITECTURE.md#v2-langgraph-sequential-workflow) | 🟦 Foundations | LangGraph sequential workflow | ✅ Completed |
-| [V3](docs/ARCHITECTURE.md#v3-sequential-simplification) | 🟦 Foundations | Notes simplification | ✅ Completed |
-| [V4](docs/ARCHITECTURE.md#v4-parallel-specialist-workers) | 🟦 Coordination | Parallel specialist workers | ✅ Completed |
-| [V5](docs/ARCHITECTURE.md#v5-orchestrator-and-delegated-subagents) | 🟦 Coordination | Orchestrator and subagent delegation | ✅ Completed |
-| [V6](docs/ARCHITECTURE.md#v6-supervisor-routing) | 🟦 Coordination | Supervisor routing | ✅ Completed |
-| [V7](docs/ARCHITECTURE.md#v7-human-approval-loop) | 🟨 Control | Human-in-the-loop approval | ✅ Completed |
-| [V8](docs/ARCHITECTURE.md#v8-automated-review-and-refinement) | 🟨 Control | Automated review and refinement | ✅ Completed |
-| [V9](docs/ARCHITECTURE.md#v9-structured-multi-agent-workflow) | 🟥 Reliability | Structured outputs, retry handling, orchestration, and safe fallback | ✅ Completed |
-| [V10](docs/ARCHITECTURE.md#v10-persistent-checkpointing-and-recovery) | 🟥 Reliability | Persistent SQLite checkpointing and workflow recovery | ✅ Completed |
-| [V11](docs/ARCHITECTURE.md#v11-cross-session-learner-memory) | 🟪 Context | Cross-session learner memory | ✅ Completed |
-| [V12](docs/ARCHITECTURE.md#v12-retrieval-with-trusted-documents-and-citations) | 🟪 Context | Retrieval from trusted local documents with citations | ✅ Completed |
-| [V13](docs/ARCHITECTURE.md#v13-tool-using-study-agents) | 🟪 Context | Controlled tool-using study agents | ✅ Completed |
-| [V14](docs/ARCHITECTURE.md#v14-dynamic-planning-and-agent-selection) | 🟧 Adaptation | Dynamic planning and agent selection | ✅ Completed |
-| [V15](docs/ARCHITECTURE.md#v15-evaluation-and-observability) | 🟧 Adaptation | Evaluation, tracing, metrics, and observability | ✅ Completed |
-| [V16](docs/ARCHITECTURE.md#v16-multi-stage-human-approval) | 🟧 Adaptation | Multi-stage human approval and interactive revision | ✅ Completed |
-| [V17](docs/ARCHITECTURE.md#v17-application-and-deployment) | 🟩 Delivery | User application, API, and local deployment | ✅ Completed locally and in Docker |
+| Version | Origin | Learning stage | Capability introduced | Status |
+| --- | --- | --- | --- | --- |
+| [V1](docs/ARCHITECTURE.md#v1-plain-python-sequential-agents) | 🟦 Tutorial baseline | 🟦 Foundations | Plain Python sequential agents | ✅ Completed |
+| [V2](docs/ARCHITECTURE.md#v2-langgraph-sequential-workflow) | 🟦 Tutorial baseline | 🟦 Foundations | LangGraph sequential workflow | ✅ Completed |
+| [V3](docs/ARCHITECTURE.md#v3-sequential-simplification) | 🧩 Extension | 🟦 Foundations | Notes simplification | ✅ Completed |
+| [V4](docs/ARCHITECTURE.md#v4-parallel-specialist-workers) | 🧩 Extension | 🟦 Coordination | Parallel specialist workers | ✅ Completed |
+| [V5](docs/ARCHITECTURE.md#v5-orchestrator-and-delegated-subagents) | 🧩 Extension | 🟦 Coordination | Orchestrator and subagent delegation | ✅ Completed |
+| [V6](docs/ARCHITECTURE.md#v6-supervisor-routing) | 🧩 Extension | 🟦 Coordination | Supervisor routing | ✅ Completed |
+| [V7](docs/ARCHITECTURE.md#v7-human-approval-loop) | 🧩 Extension | 🟨 Control | Human-in-the-loop approval | ✅ Completed |
+| [V8](docs/ARCHITECTURE.md#v8-automated-review-and-refinement) | 🧩 Extension | 🟨 Control | Automated review and refinement | ✅ Completed |
+| [V9](docs/ARCHITECTURE.md#v9-structured-multi-agent-workflow) | 🧩 Extension | 🟥 Reliability | Structured outputs, retry handling, orchestration, and safe fallback | ✅ Completed |
+| [V10](docs/ARCHITECTURE.md#v10-persistent-checkpointing-and-recovery) | 🧩 Extension | 🟥 Reliability | Persistent SQLite checkpointing and workflow recovery | ✅ Completed |
+| [V11](docs/ARCHITECTURE.md#v11-cross-session-learner-memory) | 🧩 Extension | 🟪 Context | Cross-session learner memory | ✅ Completed |
+| [V12](docs/ARCHITECTURE.md#v12-retrieval-with-trusted-documents-and-citations) | 🧩 Extension | 🟪 Context | Retrieval from trusted local documents with citations | ✅ Completed |
+| [V13](docs/ARCHITECTURE.md#v13-tool-using-study-agents) | 🧩 Extension | 🟪 Context | Controlled tool-using study agents | ✅ Completed |
+| [V14](docs/ARCHITECTURE.md#v14-dynamic-planning-and-agent-selection) | 🧩 Extension | 🟧 Adaptation | Dynamic planning and agent selection | ✅ Completed |
+| [V15](docs/ARCHITECTURE.md#v15-evaluation-and-observability) | 🧩 Extension | 🟧 Adaptation | Evaluation, tracing, metrics, and observability | ✅ Completed |
+| [V16](docs/ARCHITECTURE.md#v16-multi-stage-human-approval) | 🧩 Extension | 🟧 Adaptation | Multi-stage human approval and interactive revision | ✅ Completed |
+| [V17](docs/ARCHITECTURE.md#v17-application-and-deployment) | 🧩 Extension | 🟩 Delivery | User application, API, and local deployment | ✅ Completed locally and in Docker |
 
 See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version. The [final source and diagram audit](docs/FINAL_AUDIT.md) records all 17 source comparisons, 23 successful diagram renders, and browser workflow checks.
 
