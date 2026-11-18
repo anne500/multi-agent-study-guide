@@ -37,18 +37,29 @@ The numbered learning-map cards use colors to group stages. Those stage colors a
 | Learning map | [learning-journey.svg](assets/learning-journey.svg) | Groups the 17 separate versions into seven numbered stages |
 | README approval overview | [README architecture](../README.md#workflow-architecture) | Shows the durable review flow used by V17 |
 | Per-version workflows | [ARCHITECTURE.md](ARCHITECTURE.md) | Preserves the detailed flows for every version |
+| V17 verification map | [README validation](../README.md#validation-and-reliability) | Shows what the offline CI matrix, Docker smoke test, and live browser runs each verified |
+| V17 phase timing chart | [v17-phase-timings.svg](assets/v17-phase-timings.svg) | Shows observed planning and specialist execution on separate scales for two local conversion runs |
 
 The SVG assets contain text and shapes, scale with the page, and include accessible titles and descriptions. They use system fonts and require no JavaScript. The README uses descriptive image text, labeled badges, and stable custom anchors. Long source-file and verification tables remain available in expandable sections.
+
+### 📊 Reproduce the V17 timing figure
+
+The [CSV](data/v17-phase-timings.csv) transcribes both observed runs from the
+[V17 verification log](V17_GUIDE.md#verification). With Matplotlib installed,
+run `python scripts/plot_v17_timings.py` from the repository root to regenerate
+the standalone SVG. Planning is shown in seconds and the specialist phase in
+milliseconds. Each environment has one observed run, with one planning retry
+per run. The durations exclude human review time.
 
 ## ✅ Scope and evidence
 
 This presentation update was prepared on November 8, 2026, using the Local AI Agent repository's badges, emoji headings, architecture overview, and Learn / Explore / Evidence organization as a reference. The study-guide implementation milestone remains November 3, 2026, and its published code baseline remains v17.0.0.
 
-The original final audit records 23 Mermaid diagrams at its audited checkpoint. This refresh colors those 23 diagrams and adds one README approval overview, for 24 diagrams across the current documentation. Node labels, arrows, routing, and version order in the original diagrams are preserved. Verification for the refresh covers diagram parsing/rendering, source comparisons, asset bounds, Markdown links, anchors, and local page previews.
+The original final audit records 23 Mermaid diagrams at its audited checkpoint. The November 8 refresh colored those diagrams and added a README approval overview, bringing the total to 24 at that checkpoint. It preserved the original node labels, arrows, routing, and version order. Verification for that refresh covered rendering, source comparisons, asset bounds, Markdown links, anchors, and local page previews.
 
 The project remains complete for the documented local, single-user learning scope. The presentation does not add model-quality results, a public deployment, or an integration with another project. Use the linked evidence pages to assess those boundaries.
 
-## 🔎 Presentation verification
+## 🔎 November 8 presentation verification
 
 | Check | Result |
 | --- | --- |

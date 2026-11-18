@@ -30,7 +30,7 @@ See the [version roadmap](#version-roadmap) and [architecture guide](docs/ARCHIT
 
 ## 🧭 Explore the project
 
-[🧩 Architecture](#workflow-architecture) · [🚀 Setup](#installation) · [🧪 Results & verification](#validation-and-reliability) · [🗂️ Evidence & guides](#project-files) · [🎨 Visual standard](VISUAL_STYLE.md)
+[🧩 Architecture](#workflow-architecture) · [🚀 Setup](#installation) · [🧪 Results & verification](#validation-and-reliability) · [📊 Phase timings](#observed-local-timings) · [🗂️ Evidence & guides](#project-files) · [🎨 Visual standard](VISUAL_STYLE.md)
 
 ![Multi-Agent Study Guide: from three Python agents to a local review application](docs/assets/project-banner.svg)
 
@@ -747,6 +747,30 @@ restored the exact saved snapshot with one execution and three approvals.
 
 ## 🧪 Validation and Reliability
 
+### 🔎 What the V17 checks establish
+
+```mermaid
+flowchart TD
+    V["V17 verification"] --> O["Offline CI matrix"]
+    V --> D["Docker smoke test"]
+    V --> L["Live browser runs"]
+    O --> R["Regression behavior on Windows and Ubuntu"]
+    D --> P["HTTP approval gates and recovery after container replacement"]
+    L --> Q["Observed Qwen planning, conversion, and human approvals"]
+    classDef default fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:2px;
+    classDef check fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px;
+    classDef runtime fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px;
+    classDef evidence fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    class O,D check;
+    class L runtime;
+    class R,P,Q evidence;
+```
+
+The matrix used Python 3.12 and 3.14 on both operating systems. The Docker smoke
+test exercised the HTTP API with an offline fixture. The live browser evidence
+covers one conversion session direct on Windows and one in Docker on the same
+laptop. [CI checks](docs/CI_GUIDE.md) · [Live verification](docs/V17_GUIDE.md#verification)
+
 <details>
 <summary>Expand the per-version verification record, V10-V17</summary>
 
@@ -870,6 +894,13 @@ The following V17 evidence was verified:
 ## 📊 Observed Local Timings
 
 Performance varies with hardware, prompt length, output length, and Ollama scheduling. Runtime measurements were recorded on the Windows laptop, including its Linux Docker engine. Test rows identify the environment used; authoring and Windows measurements are not directly comparable.
+
+![V17 conversion timings. Planning took 526.872 seconds on Windows and 479.237 seconds in Docker. The specialist phase took 6.273 and 6.726 milliseconds. There was one run in each environment.](docs/assets/v17-phase-timings.svg)
+
+These are phase measurements from two observed conversion runs. Each plan
+included one retry, and the timings exclude time spent waiting for human review.
+Repeated runs would be needed to estimate an environment effect.
+[Verification log](docs/V17_GUIDE.md#verification) · [Source data](docs/data/v17-phase-timings.csv)
 
 | Version | Observed workflow time |
 |---|---:|
