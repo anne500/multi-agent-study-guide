@@ -1,6 +1,6 @@
 # 🎨 Shared Architecture Diagram Style
 
-This standard applies to the AI learning project repositories.
+This standard is shared by the five AI learning project repositories.
 Use explicit Mermaid class definitions so colors do not depend on the viewer's theme.
 
 | Role | Color | Fill | Border | Text |
@@ -51,8 +51,7 @@ architecture colors describe component roles.
   🚀 setup, ⚙️ configuration, 💬 examples, 🧪 verification,
   📊 results, 🗂️ evidence, 💾 storage, ⚠️ limitations,
   🧭 roadmap, 🟪 research, and 📚 attribution.
-- Put **Base tutorial**, **Extensions added in Project N**, and **Explore the project** near the top, in that order. Use the overview table to identify the tutorial baseline and label each added item as an adaptation, extension, or planned extension. Link to the verification evidence. Expand numbered items in the version roadmap or extension tracker when a project needs more detail.
-- Use compact navigation with stable anchors for architecture, setup and run, results and verification, evidence and guides, and tutorial credit.
+- Add compact navigation with stable section anchors.
 - Use meaningful diagrams, result graphics, and comparison tables throughout.
 - Preserve examples, evidence boundaries, and limitations when improving presentation.
 - Label pass, fail, planned, and unverified states in text as well as color.
