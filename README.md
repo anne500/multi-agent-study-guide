@@ -914,7 +914,7 @@ Repeated runs would be needed to estimate an environment effect.
 | V7: Human-in-the-loop | About 897 seconds, including human review |
 | V8: Normal approval path | About 332 seconds |
 | V8: Controlled revision demo | About 2,085 seconds |
-| V9 | No reliable end-to-end timing recorded |
+| [V9: Structured outputs, reviewer retry, and bounded quiz revision](#v9-structured-outputs-and-safe-review) | About 462 seconds in one documented run. The workflow stopped at `max_iterations` after malformed reviewer JSON. [Historical timing record](https://github.com/anne500/multi-agent-study-guide/blob/ac6e10f52e4616831ae0c4bfae8809a398f7ca99/README.md#observed-local-timings) |
 | V10: Pre-fix diagnostic run | About 6,505 seconds, which exposed the inherited reviewer-fallback defect |
 | V10: Completed checkpoint load | About 0 seconds, with no Ollama calls |
 | V10: Deterministic fallback test | Fast local test, with no Ollama calls |
