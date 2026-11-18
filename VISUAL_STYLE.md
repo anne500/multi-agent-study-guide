@@ -1,6 +1,6 @@
 # 🎨 Shared Architecture Diagram Style
 
-This standard is shared by the five AI learning project repositories.
+This standard is shared by the Darsh Shah learning series in AI Projects 71826.
 Use explicit Mermaid class definitions so colors do not depend on the viewer's theme.
 
 | Role | Color | Fill | Border | Text |
@@ -46,17 +46,18 @@ architecture colors describe component roles.
 
 ## README presentation standard
 
-- Begin with a project-specific title icon and a colored overview graphic.
+- Begin with a project-specific title icon, a colored overview graphic, and a one-sentence summary.
+- Use blue for learning, green for portfolio evidence, purple for the thesis connection, and amber for pending work in the reading map or roadmap.
 - Use the same section icons: 🧩 architecture, ✨ features, 🧰 requirements,
   🚀 setup, ⚙️ configuration, 💬 examples, 🧪 verification,
   📊 results, 🗂️ evidence, 💾 storage, ⚠️ limitations,
   🧭 roadmap, 🟪 research, and 📚 attribution.
-- Add compact navigation with stable section anchors.
-- Use meaningful diagrams, result graphics, and comparison tables throughout.
+- Put the Explore the project links in this order: base tutorial, contributions, roadmap, architecture, setup, results and verification, evidence and guides, thesis connection, and visual standard. Keep stable section anchors.
+- Include a color-coded architecture diagram and a visual roadmap. Add a chart when measured evidence supports one, and link the data or recorded result.
 - Preserve examples, evidence boundaries, and limitations when improving presentation.
 - Label pass, fail, planned, and unverified states in text as well as color.
 - Keep technical code blocks copyable and free from decorative edits.
 
 ## Tutorial provenance standard
 
-Each project README must visibly acknowledge the related tutorial author and publisher, link the exact tutorial title, and distinguish the original learning foundation from repository-specific adaptations, experiments, and research connections. For this learning sequence, credit Darsh Shah and freeCodeCamp in the introductory callout and the Tutorial Acknowledgment and Attribution section.
+Each project README must visibly acknowledge the related tutorial author and publisher, link the exact tutorial title, and distinguish the original learning foundation from repository-specific adaptations, experiments, and research connections. Use four columns in the contribution table: Origin, Item, Scope or contribution, and Verification. Label each row Tutorial baseline, Adaptation, Implemented extension, or Planned extension. Credit Darsh Shah and freeCodeCamp in the baseline and attribution sections.

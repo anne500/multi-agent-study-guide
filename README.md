@@ -1,36 +1,44 @@
 <a id="multi-agent-study-guide-with-python-langgraph-ollama-and-qwen"></a>
 
-🎨 [Shared architecture colors and diagram conventions](VISUAL_STYLE.md)
-
-> **📚 Tutorial foundation:** This learning project is based on [Darsh Shah's freeCodeCamp tutorial](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/). See [Tutorial Acknowledgment and Attribution](#tutorial-acknowledgment-and-attribution) for the original source and the repository's extensions.
-
-
 # 🤝 Multi-Agent Study Guide
 
 ![Project overview and reading map](assets/readme-overview.svg)
 
-**🟦 Learn AI · 🟩 Portfolio evidence · 🟪 PhD research · 🟠 Planned work**
+**🟦 Learn AI · 🟩 Portfolio evidence · 🟪 PhD research**
 
-## 🟦 Base tutorial
-
-V1 and V2 adapt the tutorial’s sequential study-guide workflow in plain Python and LangGraph. The article also introduces other orchestration patterns. [Darsh Shah’s freeCodeCamp tutorial: How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/)
-
-## 🧩 Extensions added in Project 1
-
-| Extension | What this project added |
-| --- | --- |
-| **V3–V8** | Implemented simplification, parallel specialists, orchestration, routing, human review, and iterative refinement. |
-| **V9–V12** | Added structured outputs and fallback, persistent checkpoint recovery, cross-session learner memory, and retrieval with citation checks. |
-| **V13–V16** | Added controlled tool use, dynamic planning, evaluation and tracing, and multi-stage approval. |
-| **V17** | Built Review Studio with a browser UI, JSON API, durable review sessions, and a verified local Docker deployment. |
-
-See the [version roadmap](#version-roadmap) and [architecture guide](docs/ARCHITECTURE.md) for the implementation and evidence by version.
+Build a local study-guide workflow through 17 versions, from sequential agents to a browser-based Review Studio.
 
 <a id="explore-the-project"></a>
 
 ## 🧭 Explore the project
 
-[🧩 Architecture](#workflow-architecture) · [🚀 Setup](#installation) · [🧪 Results & verification](#validation-and-reliability) · [📊 Phase timings](#observed-local-timings) · [🗂️ Evidence & guides](#project-files) · [🎨 Visual standard](VISUAL_STYLE.md)
+[🟦 Base tutorial](#base-tutorial) · [🧩 Contributions](#contributions) · [🗺️ Roadmap](#version-roadmap) · [🏗️ Architecture](#workflow-architecture) · [🚀 Setup](#installation) · [🧪 Results & verification](#validation-and-reliability) · [🗂️ Evidence & guides](#project-files) · [🟪 Thesis connection](#thesis-connection) · [🎨 Visual standard](VISUAL_STYLE.md)
+
+[📊 Phase timings](#observed-local-timings)
+
+> **📚 Tutorial foundation:** This learning project is based on [Darsh Shah's freeCodeCamp tutorial](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/). See [Tutorial Acknowledgment and Attribution](#tutorial-acknowledgment-and-attribution) for the original source and the repository's extensions.
+
+<a id="base-tutorial"></a>
+
+## 🟦 Base tutorial
+
+V1 and V2 adapt the tutorial’s sequential study-guide workflow in plain Python and LangGraph. The article also introduces other orchestration patterns. [Darsh Shah’s freeCodeCamp tutorial: How to Build Your First Multi-Agent AI System in Python and LangGraph](https://www.freecodecamp.org/news/how-to-build-your-first-multi-agent-ai-system-in-python-and-langgraph/)
+
+<a id="-extensions-added-in-project-1"></a>
+
+<a id="contributions"></a>
+
+## 🧩 Tutorial baseline and contributions
+
+| Origin | Item | Scope or contribution | Verification |
+| --- | --- | --- | --- |
+| 🟦 Tutorial baseline | 📘 V1–V2 | Plain Python and LangGraph implementations of the tutorial workflow. | [Architecture by version](docs/ARCHITECTURE.md) |
+| 🧩 Implemented extension | 🧩 V3–V8 | Simplification, parallel specialists, orchestration, routing, human review, and iterative refinement. | [Version roadmap](#version-roadmap) |
+| 🧩 Implemented extension | 🛡️ V9–V13 | Structured outputs, recovery, durable memory, verified retrieval, and controlled tools. | [Version roadmap](#version-roadmap) |
+| 🧩 Implemented extension | 🧭 V14–V16 | Added dynamic planning, evaluation, tracing, and multi-stage review. | [Version roadmap](#version-roadmap) |
+| 🧩 Implemented extension | 🖥️ V17 | Review Studio browser UI, JSON API, durable sessions, and local Docker deployment. | [Validation and reliability](#validation-and-reliability) |
+
+See the [version roadmap](#version-roadmap) and [architecture guide](docs/ARCHITECTURE.md) for the implementation and evidence by version.
 
 ![Multi-Agent Study Guide: from three Python agents to a local review application](docs/assets/project-banner.svg)
 
@@ -83,9 +91,9 @@ Open a version number to jump to its architecture diagram. Each implementation r
 | [V11](docs/ARCHITECTURE.md#v11-cross-session-learner-memory) | 🟪 Context | Cross-session learner memory | ✅ Completed |
 | [V12](docs/ARCHITECTURE.md#v12-retrieval-with-trusted-documents-and-citations) | 🟪 Context | Retrieval from trusted local documents with citations | ✅ Completed |
 | [V13](docs/ARCHITECTURE.md#v13-tool-using-study-agents) | 🟪 Context | Controlled tool-using study agents | ✅ Completed |
-| [V14](docs/ARCHITECTURE.md#v14-dynamic-planning-and-agent-selection) | 🟧 Adaptation | Dynamic planning and agent selection | ✅ Completed |
-| [V15](docs/ARCHITECTURE.md#v15-evaluation-and-observability) | 🟧 Adaptation | Evaluation, tracing, metrics, and observability | ✅ Completed |
-| [V16](docs/ARCHITECTURE.md#v16-multi-stage-human-approval) | 🟧 Adaptation | Multi-stage human approval and interactive revision | ✅ Completed |
+| [V14](docs/ARCHITECTURE.md#v14-dynamic-planning-and-agent-selection) | 🟧 Advanced workflow | Dynamic planning and agent selection | ✅ Completed |
+| [V15](docs/ARCHITECTURE.md#v15-evaluation-and-observability) | 🟧 Advanced workflow | Evaluation, tracing, metrics, and observability | ✅ Completed |
+| [V16](docs/ARCHITECTURE.md#v16-multi-stage-human-approval) | 🟧 Advanced workflow | Multi-stage human approval and interactive revision | ✅ Completed |
 | [V17](docs/ARCHITECTURE.md#v17-application-and-deployment) | 🟩 Delivery | User application, API, and local deployment | ✅ Completed locally and in Docker |
 
 See the [V1-V17 Architecture Guide](docs/ARCHITECTURE.md) for a detailed workflow diagram and explanation of every version. The [final source and diagram audit](docs/FINAL_AUDIT.md) records all 17 source comparisons, 23 successful diagram renders, and browser workflow checks.
@@ -974,6 +982,12 @@ The long V10 diagnostic run identified a reliability problem inherited from the 
 - A process-local browser write token is not user authentication or multi-user isolation.
 - A named volume must be tested across container replacement, not inferred from its mount configuration alone.
 - Local LLM output should still be checked for factual accuracy.
+
+<a id="thesis-connection"></a>
+
+## 🟪 Thesis connection
+
+Durable review sessions, structured execution, and explicit approvals provide candidate patterns for Build Release and Integration Engineering. The recorded study-guide and conversion runs establish local behavior. A BRI study would need representative build and release tasks, with measured evidence quality and review time.
 
 <a id="project-origin-and-extension-history"></a>
 
